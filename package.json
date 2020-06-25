@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node dist/server.js",
     "build": "yarn build:typescript && yarn build:parcel",
+    "build:watch": "yarn build:typescript -w & yarn build:parcel:watch",
     "build:parcel": "parcel build ./src/ui/index.html --public-url=/ui/ --out-dir=./dist/ui",
+    "build:parcel:watch": "parcel watch ./src/ui/index.html --public-url=/ui/ --out-dir=./dist/ui",
     "build:typescript": "tsc",
     "test": "yarn build"
   },
