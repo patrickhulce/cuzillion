@@ -1,0 +1,38 @@
+{
+  "name": "cuzillion-node",
+  "version": "0.1.0",
+  "description": "'cuz there are a zillion pages to check",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "build": "yarn build:typescript && yarn build:parcel",
+    "build:parcel": "parcel build ./src/ui/index.html --public-url=/ui/ --out-dir=./dist/ui",
+    "build:typescript": "tsc",
+    "test": "yarn build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/patrickhulce/cuzillion-node.git"
+  },
+  "keywords": [
+    "cuzillion"
+  ],
+  "author": "Patrick Hulce <patrick.hulce@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/patrickhulce/cuzillion-node/issues"
+  },
+  "homepage": "https://github.com/patrickhulce/cuzillion-node#readme",
+  "devDependencies": {
+    "@babel/core": "^7.10.3",
+    "@babel/plugin-transform-react-jsx": "^7.10.3",
+    "@babel/preset-env": "^7.10.3",
+    "@types/express": "^4.17.6",
+    "parcel": "^1.12.4",
+    "preact": "^10.4.4",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
