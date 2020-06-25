@@ -1,7 +1,7 @@
 {
-  "name": "cuzillion-node",
-  "version": "0.1.0",
-  "description": "'cuz there are a zillion pages to check",
+  "name": "cuzillion",
+  "version": "0.0.0-development",
+  "description": "'cuz there are still a zillion pages to check in 2020",
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/server.js",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/patrickhulce/cuzillion-node.git"
+    "url": "git+ssh://git@github.com/patrickhulce/cuzillion.git"
   },
   "keywords": [
     "cuzillion"
@@ -22,9 +22,9 @@
   "author": "Patrick Hulce <patrick.hulce@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/patrickhulce/cuzillion-node/issues"
+    "url": "https://github.com/patrickhulce/cuzillion/issues"
   },
-  "homepage": "https://github.com/patrickhulce/cuzillion-node#readme",
+  "homepage": "https://github.com/patrickhulce/cuzillion#readme",
   "devDependencies": {
     "@babel/core": "^7.10.3",
     "@babel/plugin-transform-react-jsx": "^7.10.3",
