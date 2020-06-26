@@ -32,6 +32,7 @@
     "@types/express": "^4.17.6",
     "parcel": "^1.12.4",
     "preact": "^10.4.4",
+    "tailwindcss": "^1.4.6",
     "typescript": "^3.9.5"
   },
   "dependencies": {
