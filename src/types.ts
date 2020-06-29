@@ -7,13 +7,13 @@ interface NetworkResource {
 }
 
 export interface NetworkResourceResponse {
-  delay?: number
-  statusCode?: number
+  config?: CuzillionConfig
   headers?: Record<string, string>
   body?: string
 }
 
 export enum ResourceType {
+  Page,
   Script,
   Stylesheet,
   Image,
@@ -39,9 +39,11 @@ export interface StyleConfig extends NetworkResource {
   evaluationTime?: number
 }
 
-export interface TextConfig {
+export interface TextConfig extends NetworkResource {
   type: ResourceType
   value?: string
 }
 
 export interface ImageConfig extends NetworkResource {}
+
+export type CuzillionConfig = PageConfig | ScriptConfig | StyleConfig | TextConfig | ImageConfig

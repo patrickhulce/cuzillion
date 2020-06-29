@@ -2,6 +2,7 @@ import {PageConfig, NetworkResourceResponse} from '../types'
 
 export function createPage(config: PageConfig): NetworkResourceResponse {
   return {
+    config,
     body: `
     <!DOCTYPE html>
 <html lang="en">
