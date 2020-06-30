@@ -53,7 +53,7 @@ export function createServer(options: {
   logFn?: (...args: any[]) => void
 }): Promise<{port: number; close: () => Promise<void>}> {
   const {port: targetPort = 9801, logFn = log} = options
-  const factory = new Factory()
+  const factory = Factory.defaultInstance()
   const app = express()
   app.get('/', (req, res) => res.sendFile(indexHtml))
   app.use('/ui/', express.static(staticDir))

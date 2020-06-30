@@ -1,14 +1,35 @@
-import {ResourceType, CuzillionConfig, NetworkResourceResponse} from '../types'
+import {ResourceType, CuzillionConfig, NetworkResourceResponse, IFactory} from '../types'
 import {createPage, injectPageBytes} from './page'
 import {injectScriptBytes, createScript} from './script'
+import {serializeConfig} from '../serialization'
 
-export class Factory {
+const DEFAULT_URL_MAP = {
+  [ResourceType.Page]: '/factory/page.html',
+  [ResourceType.Script]: '/factory/script.js',
+  [ResourceType.Stylesheet]: '/factory/style.css',
+  [ResourceType.Image]: '/factory/image.jpg',
+  [ResourceType.Text]: '/factory/article.txt',
+}
+
+export class Factory implements IFactory {
+  private _urlMap: Record<ResourceType, string>
+
+  public constructor(urlMap: Record<ResourceType, string>) {
+    this._urlMap = urlMap
+  }
+
+  public getLinkTo(config: CuzillionConfig): string {
+    const url = new URL(this._urlMap[config.type], 'http://localhost')
+    url.searchParams.set('config', serializeConfig(config))
+    return `${url.pathname}${url.search}`
+  }
+
   public create(config: CuzillionConfig): NetworkResourceResponse {
     switch (config.type) {
       case ResourceType.Page:
-        return createPage(config)
+        return {...createPage(config, this), link: this.getLinkTo(config)}
       case ResourceType.Script:
-        return createScript(config)
+        return {...createScript(config, this), link: this.getLinkTo(config)}
       default:
         throw new Error(`${config.type} not yet supported`)
     }
@@ -25,5 +46,29 @@ export class Factory {
       default:
         throw new Error(`${config.type} not yet supported`)
     }
+  }
+
+  public recursivelyFillIds(config: CuzillionConfig, state?: {current: number}): CuzillionConfig {
+    state = state || {current: 0}
+
+    config.id = config.id || `${state.current++}`
+    switch (config.type) {
+      case ResourceType.Page:
+        if (config.head)
+          config.head = config.head.map((child) => this.recursivelyFillIds(child, state) as any)
+        if (config.body)
+          config.body = config.body.map((child) => this.recursivelyFillIds(child, state) as any)
+        break
+    }
+
+    return config
+  }
+
+  public static defaultInstance(): IFactory {
+    const factory = new Factory(DEFAULT_URL_MAP)
+    factory.getLinkTo = factory.getLinkTo.bind(factory)
+    factory.create = factory.create.bind(factory)
+    factory.injectBytes = factory.injectBytes.bind(factory)
+    return factory
   }
 }
