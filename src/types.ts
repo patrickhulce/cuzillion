@@ -1,5 +1,6 @@
 interface NetworkResource {
   type: ResourceType
+  id?: string
   fetchDelay?: number
   redirectCount?: number
   statusCode?: number
@@ -20,10 +21,20 @@ export enum ResourceType {
   Text,
 }
 
-export enum ScriptType {
+export enum ScriptInclusionType {
   External,
   Inline,
-  Eval,
+}
+
+export interface ExternalScriptAttributes {
+  defer?: boolean
+  async?: boolean
+}
+
+export interface ScriptInclusionConfig {
+  inclusionType?: ScriptInclusionType
+  externalAttributes?: ExternalScriptAttributes
+  script?: ScriptConfig
 }
 
 export interface PageConfig extends NetworkResource {
@@ -36,14 +47,18 @@ export interface ScriptConfig extends NetworkResource {
 }
 
 export interface StyleConfig extends NetworkResource {
-  evaluationTime?: number
+  backgroundColor?: string
+  textColor?: string
 }
 
 export interface TextConfig extends NetworkResource {
-  type: ResourceType
-  value?: string
+  textContent?: string
 }
 
 export interface ImageConfig extends NetworkResource {}
 
 export type CuzillionConfig = PageConfig | ScriptConfig | StyleConfig | TextConfig | ImageConfig
+
+export interface IFactory {
+  create(config: CuzillionConfig): NetworkResourceResponse
+}

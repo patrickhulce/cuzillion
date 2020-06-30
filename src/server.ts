@@ -1,10 +1,10 @@
 import * as path from 'path'
 import express from 'express'
-import {createPage, injectBytes} from './factory/page'
 import {NetworkResourceResponse, CuzillionConfig} from './types'
 import {wait} from './utils'
 import {deserializeConfig, serializeConfig} from './serialization'
 import debug from 'debug'
+import {Factory} from './factory/factory'
 
 const log = debug('cuzillion:server')
 
@@ -12,9 +12,8 @@ const staticDir = path.join(__dirname, 'ui')
 const indexHtml = path.join(staticDir, 'index.html')
 
 function respondWithFactory(
-  contentType: string,
   factory: (config: CuzillionConfig) => NetworkResourceResponse,
-  injectBytes: (body: string, targetBytes: number) => string,
+  injectBytes: (config: CuzillionConfig, body: string | undefined) => string | undefined,
 ) {
   return async (req: express.Request, res: express.Response) => {
     if (!req.query) return res.sendStatus(500)
@@ -41,10 +40,7 @@ function respondWithFactory(
         }
       }
 
-      let body = response.body
-      if (body && config.sizeInBytes) body = injectBytes(body, config.sizeInBytes)
-      res.set('content-type', contentType)
-      res.send(body)
+      res.send(injectBytes(config, response.body))
     } catch (err) {
       log(`Error processing config: ${err.stack}\n`)
       res.sendStatus(500)
@@ -57,10 +53,12 @@ export function createServer(options: {
   logFn?: (...args: any[]) => void
 }): Promise<{port: number; close: () => Promise<void>}> {
   const {port: targetPort = 9801, logFn = log} = options
+  const factory = new Factory()
   const app = express()
   app.get('/', (req, res) => res.sendFile(indexHtml))
   app.use('/ui/', express.static(staticDir))
-  app.use('/factory/page.html', respondWithFactory('text/html', createPage, injectBytes))
+  app.use('/factory/page.html', respondWithFactory(factory.create, factory.injectBytes))
+  app.use('/factory/script.js', respondWithFactory(factory.create, factory.injectBytes))
 
   return new Promise((resolve, reject) => {
     const server = app.listen(targetPort, () => {

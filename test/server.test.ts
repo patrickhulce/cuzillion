@@ -20,7 +20,7 @@ describe('.createServer', () => {
     return fetch_(url.href)
   }
 
-  describe('PageConfig', () => {
+  describe('factory routes', () => {
     describe('statusCode', () => {
       it('200', async () => {
         const response = await fetch('/factory/page.html', {
@@ -44,9 +44,19 @@ describe('.createServer', () => {
     })
 
     describe('sizeInBytes', () => {
-      it('sets the body size', async () => {
+      it('sets the page body size', async () => {
         const response = await fetch('/factory/page.html', {
           type: ResourceType.Page,
+          sizeInBytes: 14000,
+        })
+
+        expect(response).toMatchObject({status: 200})
+        expect(await response.text()).toHaveLength(14000)
+      })
+
+      it('sets the script body size', async () => {
+        const response = await fetch('/factory/script.js', {
+          type: ResourceType.Script,
           sizeInBytes: 14000,
         })
 

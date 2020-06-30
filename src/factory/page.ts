@@ -3,6 +3,7 @@ import {PageConfig, NetworkResourceResponse} from '../types'
 export function createPage(config: PageConfig): NetworkResourceResponse {
   return {
     config,
+    headers: {'content-type': 'text/html'},
     body: `
     <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +16,7 @@ export function createPage(config: PageConfig): NetworkResourceResponse {
   }
 }
 
-export function injectBytes(body: string, totalByteTarget: number): string {
+export function injectPageBytes(body: string, totalByteTarget: number): string {
   const currentBytes = body.length
   const comment = `<!--  -->`
   const bytesNeeded = totalByteTarget - currentBytes - comment.length
