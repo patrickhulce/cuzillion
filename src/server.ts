@@ -1,6 +1,6 @@
 import * as path from 'path'
 import express from 'express'
-import {createPage} from './factory/page'
+import {createPage, injectBytes} from './factory/page'
 import {NetworkResourceResponse, CuzillionConfig} from './types'
 import {wait} from './utils'
 import {deserializeConfig, serializeConfig} from './serialization'
@@ -14,6 +14,7 @@ const indexHtml = path.join(staticDir, 'index.html')
 function respondWithFactory(
   contentType: string,
   factory: (config: CuzillionConfig) => NetworkResourceResponse,
+  injectBytes: (body: string, targetBytes: number) => string,
 ) {
   return async (req: express.Request, res: express.Response) => {
     if (!req.query) return res.sendStatus(500)
@@ -40,8 +41,10 @@ function respondWithFactory(
         }
       }
 
+      let body = response.body
+      if (body && config.sizeInBytes) body = injectBytes(body, config.sizeInBytes)
       res.set('content-type', contentType)
-      res.send(response.body)
+      res.send(body)
     } catch (err) {
       log(`Error processing config: ${err.stack}\n`)
       res.sendStatus(500)
@@ -57,7 +60,7 @@ export function createServer(options: {
   const app = express()
   app.get('/', (req, res) => res.sendFile(indexHtml))
   app.use('/ui/', express.static(staticDir))
-  app.use('/factory/page.html', respondWithFactory('text/html', createPage))
+  app.use('/factory/page.html', respondWithFactory('text/html', createPage, injectBytes))
 
   return new Promise((resolve, reject) => {
     const server = app.listen(targetPort, () => {

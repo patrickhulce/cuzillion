@@ -43,6 +43,18 @@ describe('.createServer', () => {
       })
     })
 
+    describe('sizeInBytes', () => {
+      it('sets the body size', async () => {
+        const response = await fetch('/factory/page.html', {
+          type: ResourceType.Page,
+          sizeInBytes: 14000,
+        })
+
+        expect(response).toMatchObject({status: 200})
+        expect(await response.text()).toHaveLength(14000)
+      })
+    })
+
     describe('redirects', () => {
       it('single redirect', async () => {
         const redirectResponse = await fetch('/factory/page.html', {
