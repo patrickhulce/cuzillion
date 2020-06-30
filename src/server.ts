@@ -59,6 +59,7 @@ export function createServer(options: {
   app.use('/ui/', express.static(staticDir))
   app.use('/factory/page.html', respondWithFactory(factory.create, factory.injectBytes))
   app.use('/factory/script.js', respondWithFactory(factory.create, factory.injectBytes))
+  app.use('/factory/style.css', respondWithFactory(factory.create, factory.injectBytes))
 
   return new Promise((resolve, reject) => {
     const server = app.listen(targetPort, () => {

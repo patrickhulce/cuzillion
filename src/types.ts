@@ -39,7 +39,7 @@ export interface ScriptInclusionConfig extends ScriptConfig {
 }
 
 export interface StyleInclusionConfig extends StyleConfig {
-  inclusionType?: StyleInclusionConfig
+  inclusionType?: StylesheetInclusionType
 }
 
 export interface PageConfig extends NetworkResource {

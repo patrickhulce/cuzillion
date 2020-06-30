@@ -63,6 +63,16 @@ describe('.createServer', () => {
         expect(response).toMatchObject({status: 200})
         expect(await response.text()).toHaveLength(14000)
       })
+
+      it('sets the stylesheet body size', async () => {
+        const response = await fetch('/factory/style.css', {
+          type: ResourceType.Stylesheet,
+          sizeInBytes: 14000,
+        })
+
+        expect(response).toMatchObject({status: 200})
+        expect(await response.text()).toHaveLength(14000)
+      })
     })
 
     describe('redirects', () => {

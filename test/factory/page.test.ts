@@ -1,6 +1,6 @@
 import {Factory} from '../../src/factory/factory'
 import {createPage, injectPageBytes} from '../../src/factory/page'
-import {ResourceType, ScriptInclusionType} from '../../src/types'
+import {ResourceType, ScriptInclusionType, StylesheetInclusionType} from '../../src/types'
 
 describe('Page', () => {
   describe('.createPage', () => {
@@ -15,6 +15,9 @@ describe('Page', () => {
               executionDuration: 50,
             },
             {type: ResourceType.Script, inclusionType: ScriptInclusionType.ExternalAsync},
+            {type: ResourceType.Stylesheet, inclusionType: StylesheetInclusionType.Inline},
+            {type: ResourceType.Stylesheet, inclusionType: StylesheetInclusionType.External},
+            {type: ResourceType.Stylesheet, inclusionType: StylesheetInclusionType.ExternalAsync},
           ],
           body: [{type: ResourceType.Script, inclusionType: ScriptInclusionType.ExternalDefer}],
         },
@@ -22,6 +25,8 @@ describe('Page', () => {
       )
 
       const [head, body] = page.body.split('<body>')
+      expect(head.match(/<style/g)).toHaveLength(1)
+      expect(head.match(/<link/g)).toHaveLength(2)
       expect(head.match(/<script/g)).toHaveLength(2)
       expect(body.match(/<script/g)).toHaveLength(1)
       expect(head).toContain('stall(50)')

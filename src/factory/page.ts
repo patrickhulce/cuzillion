@@ -5,6 +5,8 @@ import {
   ScriptInclusionConfig,
   ResourceType,
   ScriptInclusionType,
+  StyleInclusionConfig,
+  StylesheetInclusionType,
 } from '../types'
 
 const EMPTY_BODY = `
@@ -35,6 +37,20 @@ function createScriptTag(config: ScriptInclusionConfig, factory: IFactory): stri
   }
 }
 
+function createStylesheetTag(config: StyleInclusionConfig, factory: IFactory): string {
+  const {inclusionType = StylesheetInclusionType.External} = config
+  const styleResource = factory.create(config)
+  if (inclusionType === StylesheetInclusionType.Inline) {
+    return `<style>${styleResource.body}</style>`
+  } else {
+    const attributes =
+      inclusionType === StylesheetInclusionType.ExternalAsync
+        ? `rel="preload" as="style" onload="this.rel = 'stylesheet'"`
+        : 'rel="stylesheet"'
+    return `<link href=${JSON.stringify(styleResource.link)} ${attributes} />`
+  }
+}
+
 function createHtmlChildren(children: PageConfig['body'], factory: IFactory): string {
   let html = ''
   if (!children) return html
@@ -43,6 +59,9 @@ function createHtmlChildren(children: PageConfig['body'], factory: IFactory): st
     switch (child.type) {
       case ResourceType.Script:
         html += createScriptTag(child, factory)
+        break
+      case ResourceType.Stylesheet:
+        html += createStylesheetTag(child, factory)
         break
       default:
         throw new Error(`${child.type} not supported`)

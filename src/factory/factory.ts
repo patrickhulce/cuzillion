@@ -2,6 +2,7 @@ import {ResourceType, CuzillionConfig, NetworkResourceResponse, IFactory} from '
 import {createPage, injectPageBytes} from './page'
 import {injectScriptBytes, createScript} from './script'
 import {serializeConfig} from '../serialization'
+import {injectStylesheetBytes, createStylesheet} from './stylesheet'
 
 const DEFAULT_URL_MAP = {
   [ResourceType.Page]: '/factory/page.html',
@@ -30,6 +31,8 @@ export class Factory implements IFactory {
         return {...createPage(config, this), link: this.getLinkTo(config)}
       case ResourceType.Script:
         return {...createScript(config, this), link: this.getLinkTo(config)}
+      case ResourceType.Stylesheet:
+        return {...createStylesheet(config, this), link: this.getLinkTo(config)}
       default:
         throw new Error(`${config.type} not yet supported`)
     }
@@ -43,6 +46,8 @@ export class Factory implements IFactory {
         return injectPageBytes(body, config.sizeInBytes)
       case ResourceType.Script:
         return injectScriptBytes(body, config.sizeInBytes)
+      case ResourceType.Stylesheet:
+        return injectStylesheetBytes(body, config.sizeInBytes)
       default:
         throw new Error(`${config.type} not yet supported`)
     }
