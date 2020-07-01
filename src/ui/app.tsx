@@ -11,7 +11,7 @@ function getDefaultPageConfig(): PageConfig {
     if (config && config.type === ResourceType.Page) return config
   }
 
-  return {type: ResourceType.Page}
+  return {type: ResourceType.Page, body: [{type: ResourceType.Text}]}
 }
 
 const DEFAULT_STATE = getDefaultPageConfig()

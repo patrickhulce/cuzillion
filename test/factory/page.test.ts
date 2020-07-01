@@ -19,7 +19,10 @@ describe('Page', () => {
             {type: ResourceType.Stylesheet, inclusionType: StylesheetInclusionType.External},
             {type: ResourceType.Stylesheet, inclusionType: StylesheetInclusionType.ExternalAsync},
           ],
-          body: [{type: ResourceType.Script, inclusionType: ScriptInclusionType.ExternalDefer}],
+          body: [
+            {type: ResourceType.Script, inclusionType: ScriptInclusionType.ExternalDefer},
+            {type: ResourceType.Text, textContent: "I am the walrus, Goo goo g'joob"},
+          ],
         },
         Factory.defaultInstance(),
       )
@@ -30,6 +33,7 @@ describe('Page', () => {
       expect(head.match(/<script/g)).toHaveLength(2)
       expect(body.match(/<script/g)).toHaveLength(1)
       expect(head).toContain('stall(50)')
+      expect(body).toContain('I am the walrus')
     })
   })
 

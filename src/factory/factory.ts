@@ -3,6 +3,7 @@ import {createPage, injectPageBytes} from './page'
 import {injectScriptBytes, createScript} from './script'
 import {serializeConfig} from '../serialization'
 import {injectStylesheetBytes, createStylesheet} from './stylesheet'
+import {injectTextBytes, createText} from './text'
 
 const DEFAULT_URL_MAP = {
   [ResourceType.Page]: '/factory/page.html',
@@ -33,6 +34,8 @@ export class Factory implements IFactory {
         return {...createScript(config, this), link: this.getLinkTo(config)}
       case ResourceType.Stylesheet:
         return {...createStylesheet(config, this), link: this.getLinkTo(config)}
+      case ResourceType.Text:
+        return {...createText(config, this), link: this.getLinkTo(config)}
       default:
         throw new Error(`${config.type} not yet supported`)
     }
@@ -48,6 +51,8 @@ export class Factory implements IFactory {
         return injectScriptBytes(body, config.sizeInBytes)
       case ResourceType.Stylesheet:
         return injectStylesheetBytes(body, config.sizeInBytes)
+      case ResourceType.Text:
+        return injectTextBytes(body, config.sizeInBytes)
       default:
         throw new Error(`${config.type} not yet supported`)
     }

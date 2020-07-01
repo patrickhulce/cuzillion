@@ -7,6 +7,7 @@ import {
   StylesheetInclusionType,
   withDefaults,
   ScriptInclusionType,
+  TextConfig,
 } from '../types'
 import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
 import cloneDeep from 'lodash-es/cloneDeep'
@@ -104,12 +105,38 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
   )
 }
 
+const TextConfigurator = (props: ConfigProps<TextConfig>) => {
+  const config = withDefaults(props.config)
+  return (
+    <div className="rounded bg-blue-900 p-2 mb-2">
+      <div className="w-full flex items-center">
+        <div className="w-full sm:w-auto mr-4">Text</div>
+        <div className="w-full sm:w-auto mr-4">
+          <input
+            className="text-black rounded px-1"
+            type="text"
+            value={config.textContent}
+            onChange={(e) => clickHandler({textContent: e.target.value}, props)()}
+          />
+        </div>
+        <div className="w-full sm:w-auto mr-4 flex items-center">
+          <Button solo onClick={() => clickHandler(null, props)()} size="xs">
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const ChildConfigurator = (props: {config: PageChildConfig} & Omit<ConfigProps, 'config'>) => {
   switch (props.config.type) {
     case ResourceType.Script:
       return <ScriptConfigurator {...props} config={props.config} />
     case ResourceType.Stylesheet:
       return <StyleConfigurator {...props} config={props.config} />
+    case ResourceType.Text:
+      return <TextConfigurator {...props} config={props.config} />
     default:
       return <div>Unsupported</div>
   }
@@ -141,6 +168,9 @@ const PageSubtarget = (
       <ButtonGroup className="py-2 text-sm">
         <Button onClick={clickHandler(ResourceType.Script)}>Script</Button>
         <Button onClick={clickHandler(ResourceType.Stylesheet)}>Stylesheet</Button>
+        {props.label === 'body' ? (
+          <Button onClick={clickHandler(ResourceType.Text)}>Text</Button>
+        ) : null}
       </ButtonGroup>
     </div>
   )

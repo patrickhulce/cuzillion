@@ -64,6 +64,9 @@ function createHtmlChildren(children: PageConfig['body'], factory: IFactory): st
       case ResourceType.Stylesheet:
         html += createStylesheetTag(child, factory)
         break
+      case ResourceType.Text:
+        html += `<p>${factory.create(child).body}</p>`
+        break
       default:
         throw new Error(`${child.type} not supported`)
     }
