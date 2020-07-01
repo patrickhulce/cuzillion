@@ -18,6 +18,10 @@ const DEFAULT_STATE = getDefaultPageConfig()
 
 export const App = () => {
   const [config, setConfig] = useState<PageConfig>(DEFAULT_STATE)
+  const iframeUrl = new URL(
+    `/factory/page.html?config=${serializeConfig(config)}`,
+    window.location.origin,
+  ).href
 
   useEffect(() => {
     window.location.hash = `#config=${serializeConfig(config)}`
@@ -43,14 +47,43 @@ export const App = () => {
           </div>
         </nav>
         <div className="flex flex-col items-center flex-grow p-4 shadow">
+          <div className="flex w-full mb-4 text-sm">
+            <div className="flex flex-wrap w-1/2">
+              <div className="mr-4 text-gray-400">Editor URL</div>
+              <input
+                className="opacity-75 flex-grow mr-4 rounded text-gray-800 px-1"
+                type="text"
+                value={window.location.href}
+                onClick={(e) => {
+                  if (!(e.target instanceof HTMLInputElement)) return
+                  e.target.select()
+                  if (!navigator.clipboard) return
+                  navigator.clipboard.writeText(window.location.href)
+                }}
+                onKeyDown={(e) => e.preventDefault()}
+              />
+            </div>
+            <div className="flex flex-wrap w-1/2">
+              <div className="mr-4 text-gray-400">Page URL</div>
+              <input
+                className="opacity-75 flex-grow mr-4 rounded text-gray-800 px-1"
+                type="text"
+                value={iframeUrl}
+                onClick={(e) => {
+                  if (!(e.target instanceof HTMLInputElement)) return
+                  e.target.select()
+                  if (!navigator.clipboard) return
+                  navigator.clipboard.writeText(iframeUrl)
+                }}
+                onKeyDown={(e) => e.preventDefault()}
+              />
+            </div>
+          </div>
           <PageConfigurator config={config} setRootConfig={setConfig} configPath={[]} />
         </div>
       </div>
       <div className="w-full sm:w-1/2 h-screen bg-white">
-        <iframe
-          className="h-screen"
-          src={`/factory/page.html?config=${serializeConfig(config)}`}
-        ></iframe>
+        <iframe className="h-screen" src={iframeUrl}></iframe>
       </div>
     </div>
   )

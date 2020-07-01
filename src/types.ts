@@ -122,7 +122,7 @@ const configDefaults: ConfigDefaultsMap = {
   [ResourceType.Text](config: TextConfig) {
     return {
       ...defaultNetworkResource,
-      textContent: 'Hello, World!',
+      textContent: 'Hello, Cuzillion!',
       ...config,
     }
   },

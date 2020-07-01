@@ -50,8 +50,8 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
   return (
     <div className="rounded bg-blue-900 p-2 mb-2">
       <div className="w-full flex items-center">
-        <div className="w-full sm:w-auto sm:mr-4">Script</div>
-        <div className="w-full sm:w-auto sm:mr-4">
+        <div className="w-full sm:w-auto mr-4">Script</div>
+        <div className="w-full sm:w-auto mr-4">
           <RadioButtonGroup
             size="xs"
             color="teal"
@@ -65,7 +65,7 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
             setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
           />
         </div>
-        <div className="w-full sm:w-auto sm:mr-4 flex items-center">
+        <div className="w-full sm:w-auto mr-4 flex items-center">
           <Button solo onClick={() => clickHandler(null, props)()} size="xs">
             <TrashIcon className="h-4 w-4" />
           </Button>
@@ -80,8 +80,8 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
   return (
     <div className="rounded bg-blue-900 p-2 mb-2">
       <div className="w-full flex items-center">
-        <div className="w-full sm:w-auto sm:mr-4">Style</div>
-        <div className="w-full sm:w-auto sm:mr-4">
+        <div className="w-full sm:w-auto mr-4">Style</div>
+        <div className="w-full sm:w-auto mr-4">
           <RadioButtonGroup
             size="xs"
             color="teal"
@@ -94,7 +94,7 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
             setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
           />
         </div>
-        <div className="w-full sm:w-auto sm:mr-4 flex items-center">
+        <div className="w-full sm:w-auto mr-4 flex items-center">
           <Button solo onClick={() => clickHandler(null, props)()} size="xs">
             <TrashIcon className="h-4 w-4" />
           </Button>
