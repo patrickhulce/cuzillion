@@ -83,7 +83,7 @@ export const App = () => {
         </div>
       </div>
       <div className="w-full sm:w-1/2 h-screen bg-white">
-        <iframe className="h-screen" src={iframeUrl}></iframe>
+        <iframe className="w-full h-screen" src={iframeUrl}></iframe>
       </div>
     </div>
   )

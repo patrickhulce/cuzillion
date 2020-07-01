@@ -4,13 +4,14 @@ import {injectScriptBytes, createScript} from './script'
 import {serializeConfig} from '../serialization'
 import {injectStylesheetBytes, createStylesheet} from './stylesheet'
 import {injectTextBytes, createText} from './text'
+import {createImage} from './image'
 
 const DEFAULT_URL_MAP = {
   [ConfigType.Page]: '/factory/page.html',
   [ConfigType.Script]: '/factory/script.js',
   [ConfigType.Stylesheet]: '/factory/style.css',
   [ConfigType.Image]: '/factory/image.jpg',
-  [ConfigType.Text]: '/factory/article.txt',
+  [ConfigType.Text]: '/not-supported',
 }
 
 export class Factory implements IFactory {
@@ -36,13 +37,17 @@ export class Factory implements IFactory {
         return {...createStylesheet(config, this), link: this.getLinkTo(config)}
       case ConfigType.Text:
         return {...createText(config, this), link: this.getLinkTo(config)}
-      default:
-        throw new Error(`${config.type} not yet supported`)
+      case ConfigType.Image:
+        return {...createImage(config, this), link: this.getLinkTo(config)}
     }
   }
 
-  public injectBytes(config: CuzillionConfig, body: string | undefined): string | undefined {
+  public injectBytes(
+    config: CuzillionConfig,
+    body: Buffer | string | undefined,
+  ): Buffer | string | undefined {
     if (body === undefined || !config.sizeInBytes) return body
+    if (Buffer.isBuffer(body)) throw new Error('Buffer byte injection not supported')
 
     switch (config.type) {
       case ConfigType.Page:
@@ -54,7 +59,7 @@ export class Factory implements IFactory {
       case ConfigType.Text:
         return injectTextBytes(body, config.sizeInBytes)
       default:
-        throw new Error(`${config.type} not yet supported`)
+        throw new Error(`${config.type} not yet supported for injection`)
     }
   }
 

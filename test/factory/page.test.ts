@@ -27,7 +27,7 @@ describe('Page', () => {
         Factory.defaultInstance(),
       )
 
-      const [head, body] = page.body.split('<body>')
+      const [head, body] = page.body.toString().split('<body>')
       expect(head.match(/<style/g)).toHaveLength(1)
       expect(head.match(/<link/g)).toHaveLength(2)
       expect(head.match(/<script/g)).toHaveLength(2)
@@ -40,7 +40,7 @@ describe('Page', () => {
   describe('.injectPageBytes', () => {
     it('should match the exact number of bytes', async () => {
       const page = createPage({type: ConfigType.Page}, Factory.defaultInstance())
-      const largePage = injectPageBytes(page.body || '', 1024 * 1024)
+      const largePage = injectPageBytes((page.body || '').toString(), 1024 * 1024)
       expect(largePage).toHaveLength(1024 * 1024)
     })
   })

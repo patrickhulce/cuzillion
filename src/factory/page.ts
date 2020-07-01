@@ -9,6 +9,7 @@ import {
   StyleConfig,
   withDefaults,
   walkConfig,
+  ImageConfig,
 } from '../types'
 import cloneDeep from 'lodash/cloneDeep'
 
@@ -54,6 +55,14 @@ function createStylesheetTag(config: StyleConfig, factory: IFactory): string {
   }
 }
 
+function createImageTag(config: ImageConfig, factory: IFactory): string {
+  const {width, height} = withDefaults(config)
+  const imageResource = factory.create(config)
+  return `<img src=${JSON.stringify(
+    imageResource.link,
+  )} style="width: ${width}px; height: ${height}px" />`
+}
+
 function createHtmlChildren(children: PageConfig['body'], factory: IFactory): string {
   let html = ''
   if (!children) return html
@@ -66,11 +75,12 @@ function createHtmlChildren(children: PageConfig['body'], factory: IFactory): st
       case ConfigType.Stylesheet:
         html += createStylesheetTag(child, factory)
         break
+      case ConfigType.Image:
+        html += createImageTag(child, factory)
+        break
       case ConfigType.Text:
         html += `<p>${factory.create(child).body}</p>`
         break
-      default:
-        throw new Error(`${child.type} not supported`)
     }
   }
 

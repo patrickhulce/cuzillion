@@ -13,7 +13,10 @@ const indexHtml = path.join(staticDir, 'index.html')
 
 function respondWithFactory(
   factory: (config: NetworkResourceConfig) => NetworkResourceResponse,
-  injectBytes: (config: NetworkResourceConfig, body: string | undefined) => string | undefined,
+  injectBytes: (
+    config: NetworkResourceConfig,
+    body: Buffer | string | undefined,
+  ) => Buffer | string | undefined,
 ) {
   return async (req: express.Request, res: express.Response) => {
     if (!req.query) return res.sendStatus(500)
@@ -61,6 +64,7 @@ export function createServer(options: {
   app.use('/factory/page.html', respondWithFactory(factory.create, factory.injectBytes))
   app.use('/factory/script.js', respondWithFactory(factory.create, factory.injectBytes))
   app.use('/factory/style.css', respondWithFactory(factory.create, factory.injectBytes))
+  app.use('/factory/image.jpg', respondWithFactory(factory.create, factory.injectBytes))
 
   return new Promise((resolve, reject) => {
     const server = app.listen(targetPort, () => {

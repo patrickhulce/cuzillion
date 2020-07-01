@@ -10,7 +10,7 @@ export interface NetworkResourceResponse {
   link: string
   config: CuzillionConfig
   headers: Record<string, string>
-  body: string
+  body: string | Buffer
 }
 
 export enum ConfigType {
@@ -62,6 +62,8 @@ export interface TextConfig {
 
 export interface ImageConfig extends NetworkResource {
   type: ConfigType.Image
+  width?: number
+  height?: number
 }
 
 export type NetworkResourceConfig = PageConfig | ScriptConfig | StyleConfig | ImageConfig
@@ -71,7 +73,10 @@ export type CuzillionConfig = NetworkResourceConfig | TextConfig
 export interface IFactory {
   getLinkTo(config: CuzillionConfig): string
   create(config: CuzillionConfig): NetworkResourceResponse
-  injectBytes(config: CuzillionConfig, body: string | undefined): string | undefined
+  injectBytes(
+    config: CuzillionConfig,
+    body: Buffer | string | undefined,
+  ): Buffer | string | undefined
 }
 
 interface ConfigDefaultsMap {
@@ -119,6 +124,8 @@ const configDefaults: ConfigDefaultsMap = {
   [ConfigType.Image](config: ImageConfig) {
     return {
       ...defaultNetworkResource,
+      width: 100,
+      height: 100,
       ...config,
     }
   },

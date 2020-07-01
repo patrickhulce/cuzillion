@@ -9,6 +9,7 @@ import {
   ScriptInclusionType,
   TextConfig,
   EMPTY_PAGE,
+  ImageConfig,
 } from '../types'
 import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
@@ -106,6 +107,38 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
   )
 }
 
+const ImageConfigurator = (props: ConfigProps<ImageConfig>) => {
+  const config = withDefaults(props.config)
+  return (
+    <div className="rounded bg-blue-900 p-2 mb-2">
+      <div className="w-full flex items-center">
+        <div className="w-full sm:w-auto mr-4">Image</div>
+        <div className="w-full sm:w-auto mr-4">
+          <input
+            className="text-black rounded px-1 w-12"
+            type="text"
+            value={config.width}
+            onChange={(e) => clickHandler({width: Number(e.target.value)}, props)()}
+          />
+          <span className="mx-1">x</span>
+          <input
+            className="text-black rounded px-1 w-12"
+            type="text"
+            value={config.height}
+            onChange={(e) => clickHandler({height: Number(e.target.value)}, props)()}
+          />
+        </div>
+        <div className="w-full sm:w-auto mr-4"></div>
+        <div className="w-full sm:w-auto mr-4 flex items-center">
+          <Button solo onClick={() => clickHandler(null, props)()} size="xs">
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const TextConfigurator = (props: ConfigProps<TextConfig>) => {
   const config = withDefaults(props.config)
   return (
@@ -136,6 +169,8 @@ const ChildConfigurator = (props: {config: PageChildConfig} & Omit<ConfigProps, 
       return <ScriptConfigurator {...props} config={props.config} />
     case ConfigType.Stylesheet:
       return <StyleConfigurator {...props} config={props.config} />
+    case ConfigType.Image:
+      return <ImageConfigurator {...props} config={props.config} />
     case ConfigType.Text:
       return <TextConfigurator {...props} config={props.config} />
     default:
@@ -169,6 +204,9 @@ const PageSubtarget = (
       <ButtonGroup className="py-2 text-sm">
         <Button onClick={clickHandler(ConfigType.Script)}>Script</Button>
         <Button onClick={clickHandler(ConfigType.Stylesheet)}>Stylesheet</Button>
+        {props.label === 'body' ? (
+          <Button onClick={clickHandler(ConfigType.Image)}>Image</Button>
+        ) : null}
         {props.label === 'body' ? (
           <Button onClick={clickHandler(ConfigType.Text)}>Text</Button>
         ) : null}
