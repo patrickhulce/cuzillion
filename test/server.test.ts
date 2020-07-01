@@ -1,6 +1,6 @@
 import {createServer} from '../src/server'
 import {fetch as fetch_} from '../src/node-fetch'
-import {CuzillionConfig, ResourceType} from '../src/types'
+import {CuzillionConfig, ConfigType} from '../src/types'
 import {serializeConfig} from '../src/serialization'
 
 describe('.createServer', () => {
@@ -24,7 +24,7 @@ describe('.createServer', () => {
     describe('statusCode', () => {
       it('200', async () => {
         const response = await fetch('/factory/page.html', {
-          type: ResourceType.Page,
+          type: ConfigType.Page,
         })
 
         expect(response).toMatchObject({
@@ -35,7 +35,7 @@ describe('.createServer', () => {
 
       it('403', async () => {
         const response = await fetch('/factory/page.html', {
-          type: ResourceType.Page,
+          type: ConfigType.Page,
           statusCode: 403,
         })
 
@@ -46,7 +46,7 @@ describe('.createServer', () => {
     describe('sizeInBytes', () => {
       it('sets the page body size', async () => {
         const response = await fetch('/factory/page.html', {
-          type: ResourceType.Page,
+          type: ConfigType.Page,
           sizeInBytes: 14000,
         })
 
@@ -56,7 +56,7 @@ describe('.createServer', () => {
 
       it('sets the script body size', async () => {
         const response = await fetch('/factory/script.js', {
-          type: ResourceType.Script,
+          type: ConfigType.Script,
           sizeInBytes: 14000,
         })
 
@@ -66,7 +66,7 @@ describe('.createServer', () => {
 
       it('sets the stylesheet body size', async () => {
         const response = await fetch('/factory/style.css', {
-          type: ResourceType.Stylesheet,
+          type: ConfigType.Stylesheet,
           sizeInBytes: 14000,
         })
 
@@ -78,7 +78,7 @@ describe('.createServer', () => {
     describe('redirects', () => {
       it('single redirect', async () => {
         const redirectResponse = await fetch('/factory/page.html', {
-          type: ResourceType.Page,
+          type: ConfigType.Page,
           redirectCount: 1,
         })
 
@@ -95,7 +95,7 @@ describe('.createServer', () => {
 
       it('multiple redirects', async () => {
         const redirectResponse = await fetch('/factory/page.html', {
-          type: ResourceType.Page,
+          type: ConfigType.Page,
           redirectCount: 2,
         })
 
@@ -120,7 +120,7 @@ describe('.createServer', () => {
       it('with fetch delay', async () => {
         const start = Date.now()
         const redirectResponse = await fetch('/factory/page.html', {
-          type: ResourceType.Page,
+          type: ConfigType.Page,
           redirectCount: 1,
           fetchDelay: 250,
         })

@@ -1,7 +1,7 @@
 import {h, Fragment} from 'preact'
 import {
   PageConfig,
-  ResourceType,
+  ConfigType,
   ScriptConfig,
   StyleConfig,
   StylesheetInclusionType,
@@ -131,11 +131,11 @@ const TextConfigurator = (props: ConfigProps<TextConfig>) => {
 
 const ChildConfigurator = (props: {config: PageChildConfig} & Omit<ConfigProps, 'config'>) => {
   switch (props.config.type) {
-    case ResourceType.Script:
+    case ConfigType.Script:
       return <ScriptConfigurator {...props} config={props.config} />
-    case ResourceType.Stylesheet:
+    case ConfigType.Stylesheet:
       return <StyleConfigurator {...props} config={props.config} />
-    case ResourceType.Text:
+    case ConfigType.Text:
       return <TextConfigurator {...props} config={props.config} />
     default:
       return <div>Unsupported</div>
@@ -166,10 +166,10 @@ const PageSubtarget = (
         />
       ))}
       <ButtonGroup className="py-2 text-sm">
-        <Button onClick={clickHandler(ResourceType.Script)}>Script</Button>
-        <Button onClick={clickHandler(ResourceType.Stylesheet)}>Stylesheet</Button>
+        <Button onClick={clickHandler(ConfigType.Script)}>Script</Button>
+        <Button onClick={clickHandler(ConfigType.Stylesheet)}>Stylesheet</Button>
         {props.label === 'body' ? (
-          <Button onClick={clickHandler(ResourceType.Text)}>Text</Button>
+          <Button onClick={clickHandler(ConfigType.Text)}>Text</Button>
         ) : null}
       </ButtonGroup>
     </div>

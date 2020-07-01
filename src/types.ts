@@ -13,7 +13,7 @@ export interface NetworkResourceResponse {
   body: string
 }
 
-export enum ResourceType {
+export enum ConfigType {
   Page = 'p',
   Script = 'js',
   Stylesheet = 'css',
@@ -35,34 +35,38 @@ export enum StylesheetInclusionType {
 }
 
 export interface PageConfig extends NetworkResource {
-  type: ResourceType.Page
+  type: ConfigType.Page
   head?: Array<ScriptConfig | StyleConfig>
   body?: Array<ScriptConfig | StyleConfig | ImageConfig | TextConfig>
 }
 
 export interface ScriptConfig extends NetworkResource {
-  type: ResourceType.Script
+  type: ConfigType.Script
   executionDuration?: number
   inclusionType?: ScriptInclusionType
 }
 
 export interface StyleConfig extends NetworkResource {
-  type: ResourceType.Stylesheet
+  type: ConfigType.Stylesheet
   backgroundColor?: string
   textColor?: string
   inclusionType?: StylesheetInclusionType
 }
 
-export interface TextConfig extends NetworkResource {
-  type: ResourceType.Text
+export interface TextConfig {
+  type: ConfigType.Text
+  id?: string
+  sizeInBytes?: number
   textContent?: string
 }
 
 export interface ImageConfig extends NetworkResource {
-  type: ResourceType.Image
+  type: ConfigType.Image
 }
 
-export type CuzillionConfig = PageConfig | ScriptConfig | StyleConfig | TextConfig | ImageConfig
+export type NetworkResourceConfig = PageConfig | ScriptConfig | StyleConfig | ImageConfig
+
+export type CuzillionConfig = NetworkResourceConfig | TextConfig
 
 export interface IFactory {
   getLinkTo(config: CuzillionConfig): string
@@ -71,11 +75,11 @@ export interface IFactory {
 }
 
 interface ConfigDefaultsMap {
-  [ResourceType.Page](page: PageConfig): Required<PageConfig>
-  [ResourceType.Script](page: ScriptConfig): Required<ScriptConfig>
-  [ResourceType.Stylesheet](page: StyleConfig): Required<StyleConfig>
-  [ResourceType.Image](page: ImageConfig): Required<ImageConfig>
-  [ResourceType.Text](page: TextConfig): Required<TextConfig>
+  [ConfigType.Page](page: PageConfig): Required<PageConfig>
+  [ConfigType.Script](page: ScriptConfig): Required<ScriptConfig>
+  [ConfigType.Stylesheet](page: StyleConfig): Required<StyleConfig>
+  [ConfigType.Image](page: ImageConfig): Required<ImageConfig>
+  [ConfigType.Text](page: TextConfig): Required<TextConfig>
 }
 
 const defaultNetworkResource: Required<NetworkResource> = {
@@ -87,7 +91,7 @@ const defaultNetworkResource: Required<NetworkResource> = {
 }
 
 const configDefaults: ConfigDefaultsMap = {
-  [ResourceType.Page](config: PageConfig) {
+  [ConfigType.Page](config: PageConfig) {
     return {
       ...defaultNetworkResource,
       head: [],
@@ -95,7 +99,7 @@ const configDefaults: ConfigDefaultsMap = {
       ...config,
     }
   },
-  [ResourceType.Script](config: ScriptConfig) {
+  [ConfigType.Script](config: ScriptConfig) {
     return {
       ...defaultNetworkResource,
       executionDuration: 0,
@@ -103,7 +107,7 @@ const configDefaults: ConfigDefaultsMap = {
       ...config,
     }
   },
-  [ResourceType.Stylesheet](config: StyleConfig) {
+  [ConfigType.Stylesheet](config: StyleConfig) {
     return {
       ...defaultNetworkResource,
       inclusionType: StylesheetInclusionType.External,
@@ -112,19 +116,24 @@ const configDefaults: ConfigDefaultsMap = {
       ...config,
     }
   },
-  [ResourceType.Image](config: ImageConfig) {
+  [ConfigType.Image](config: ImageConfig) {
     return {
       ...defaultNetworkResource,
       ...config,
     }
   },
-  [ResourceType.Text](config: TextConfig) {
+  [ConfigType.Text](config: TextConfig) {
     return {
-      ...defaultNetworkResource,
+      id: '',
+      sizeInBytes: 0,
       textContent: 'Hello, Cuzillion!',
       ...config,
     }
   },
+}
+
+export function isNetworkResource(config: CuzillionConfig): config is NetworkResourceConfig {
+  return config.type !== ConfigType.Text
 }
 
 export function withDefaults<T extends CuzillionConfig>(config: T): Required<T> {
@@ -137,7 +146,7 @@ export function walkConfig(config: CuzillionConfig, processFn: (c: CuzillionConf
   processFn(config)
 
   switch (config.type) {
-    case ResourceType.Page:
+    case ConfigType.Page:
       if (config.body) config.body.forEach((child) => walkConfig(child, processFn))
       if (config.head) config.head.forEach((child) => walkConfig(child, processFn))
       break

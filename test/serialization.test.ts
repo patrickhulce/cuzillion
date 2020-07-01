@@ -1,11 +1,11 @@
 import * as serialization from '../src/serialization'
-import {withDefaults, ResourceType} from '../src/types'
+import {withDefaults, ConfigType} from '../src/types'
 
 describe('serialization', () => {
   it('should round-trip correctly', () => {
     const config = withDefaults({
-      type: ResourceType.Page,
-      body: [withDefaults({type: ResourceType.Script})],
+      type: ConfigType.Page,
+      body: [withDefaults({type: ConfigType.Script})],
     })
 
     const serialized = serialization.serializeConfig(config)
@@ -16,18 +16,21 @@ describe('serialization', () => {
 
   describe('.serializeConfig', () => {
     it('should elide default data', () => {
-      const serializedA = serialization.serializeConfig({type: ResourceType.Page, head: []})
-      const serializedB = serialization.serializeConfig({type: ResourceType.Page})
+      const serializedA = serialization.serializeConfig({type: ConfigType.Page, head: []})
+      const serializedB = serialization.serializeConfig({type: ConfigType.Page})
       expect(serializedA).toEqual(serializedB)
+      const deserialized = serialization.deserializeConfig(serializedA)
+      const reserialized = serialization.serializeConfig(deserialized)
+      expect(reserialized).toEqual(serializedA)
     })
   })
 
   describe('.deserializeConfig', () => {
     it('should rehydrate default data', () => {
-      const serialized = serialization.serializeConfig({type: ResourceType.Page})
+      const serialized = serialization.serializeConfig({type: ConfigType.Page})
       const deserialized = serialization.deserializeConfig(serialized)
       expect(deserialized).toEqual({
-        type: ResourceType.Page,
+        type: ConfigType.Page,
         head: [],
         body: [],
         id: '',

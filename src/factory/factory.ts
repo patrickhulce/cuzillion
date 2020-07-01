@@ -1,4 +1,4 @@
-import {ResourceType, CuzillionConfig, NetworkResourceResponse, IFactory} from '../types'
+import {ConfigType, CuzillionConfig, NetworkResourceResponse, IFactory} from '../types'
 import {createPage, injectPageBytes} from './page'
 import {injectScriptBytes, createScript} from './script'
 import {serializeConfig} from '../serialization'
@@ -6,17 +6,17 @@ import {injectStylesheetBytes, createStylesheet} from './stylesheet'
 import {injectTextBytes, createText} from './text'
 
 const DEFAULT_URL_MAP = {
-  [ResourceType.Page]: '/factory/page.html',
-  [ResourceType.Script]: '/factory/script.js',
-  [ResourceType.Stylesheet]: '/factory/style.css',
-  [ResourceType.Image]: '/factory/image.jpg',
-  [ResourceType.Text]: '/factory/article.txt',
+  [ConfigType.Page]: '/factory/page.html',
+  [ConfigType.Script]: '/factory/script.js',
+  [ConfigType.Stylesheet]: '/factory/style.css',
+  [ConfigType.Image]: '/factory/image.jpg',
+  [ConfigType.Text]: '/factory/article.txt',
 }
 
 export class Factory implements IFactory {
-  private _urlMap: Record<ResourceType, string>
+  private _urlMap: Record<ConfigType, string>
 
-  public constructor(urlMap: Record<ResourceType, string>) {
+  public constructor(urlMap: Record<ConfigType, string>) {
     this._urlMap = urlMap
   }
 
@@ -28,13 +28,13 @@ export class Factory implements IFactory {
 
   public create(config: CuzillionConfig): NetworkResourceResponse {
     switch (config.type) {
-      case ResourceType.Page:
+      case ConfigType.Page:
         return {...createPage(config, this), link: this.getLinkTo(config)}
-      case ResourceType.Script:
+      case ConfigType.Script:
         return {...createScript(config, this), link: this.getLinkTo(config)}
-      case ResourceType.Stylesheet:
+      case ConfigType.Stylesheet:
         return {...createStylesheet(config, this), link: this.getLinkTo(config)}
-      case ResourceType.Text:
+      case ConfigType.Text:
         return {...createText(config, this), link: this.getLinkTo(config)}
       default:
         throw new Error(`${config.type} not yet supported`)
@@ -45,13 +45,13 @@ export class Factory implements IFactory {
     if (body === undefined || !config.sizeInBytes) return body
 
     switch (config.type) {
-      case ResourceType.Page:
+      case ConfigType.Page:
         return injectPageBytes(body, config.sizeInBytes)
-      case ResourceType.Script:
+      case ConfigType.Script:
         return injectScriptBytes(body, config.sizeInBytes)
-      case ResourceType.Stylesheet:
+      case ConfigType.Stylesheet:
         return injectStylesheetBytes(body, config.sizeInBytes)
-      case ResourceType.Text:
+      case ConfigType.Text:
         return injectTextBytes(body, config.sizeInBytes)
       default:
         throw new Error(`${config.type} not yet supported`)

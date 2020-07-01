@@ -1,6 +1,6 @@
 import * as path from 'path'
 import express from 'express'
-import {NetworkResourceResponse, CuzillionConfig} from './types'
+import {NetworkResourceResponse, NetworkResourceConfig, isNetworkResource} from './types'
 import {wait} from './utils'
 import {deserializeConfig, serializeConfig} from './serialization'
 import debug from 'debug'
@@ -12,8 +12,8 @@ const staticDir = path.join(__dirname, 'ui')
 const indexHtml = path.join(staticDir, 'index.html')
 
 function respondWithFactory(
-  factory: (config: CuzillionConfig) => NetworkResourceResponse,
-  injectBytes: (config: CuzillionConfig, body: string | undefined) => string | undefined,
+  factory: (config: NetworkResourceConfig) => NetworkResourceResponse,
+  injectBytes: (config: NetworkResourceConfig, body: string | undefined) => string | undefined,
 ) {
   return async (req: express.Request, res: express.Response) => {
     if (!req.query) return res.sendStatus(500)
@@ -23,6 +23,7 @@ function respondWithFactory(
       const config = deserializeConfig(req.query.config)
       log(`received request with config`, config)
       if (!config) throw new Error(`No valid config`)
+      if (!isNetworkResource(config)) throw new Error('Config not for network resource')
       if (config.fetchDelay) await wait(config.fetchDelay)
       if (config.redirectCount) {
         const newConfig = {...config, redirectCount: config.redirectCount - 1}

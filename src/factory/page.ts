@@ -2,7 +2,7 @@ import {
   PageConfig,
   NetworkResourceResponse,
   IFactory,
-  ResourceType,
+  ConfigType,
   ScriptInclusionType,
   StylesheetInclusionType,
   ScriptConfig,
@@ -60,13 +60,13 @@ function createHtmlChildren(children: PageConfig['body'], factory: IFactory): st
 
   for (const child of children) {
     switch (child.type) {
-      case ResourceType.Script:
+      case ConfigType.Script:
         html += createScriptTag(child, factory)
         break
-      case ResourceType.Stylesheet:
+      case ConfigType.Stylesheet:
         html += createStylesheetTag(child, factory)
         break
-      case ResourceType.Text:
+      case ConfigType.Text:
         html += `<p>${factory.create(child).body}</p>`
         break
       default:
