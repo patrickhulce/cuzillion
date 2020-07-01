@@ -1,20 +1,16 @@
-import {NetworkResourceResponse, ScriptConfig, IFactory} from '../types'
+import {NetworkResourceResponse, ScriptConfig, IFactory, withDefaults} from '../types'
 import {stall} from '../utils'
 
 export function createScript(
   config: ScriptConfig,
   factory: IFactory,
 ): Omit<NetworkResourceResponse, 'link'> {
-  let script = `console.log('script ID ${config.id} started');`
-  if (typeof config.executionDuration === 'number') {
-    script += `
+  const {executionDuration, id} = withDefaults(config)
+  const script = `
+    console.log('script ID ${id} started');
     ${stall.toString()};
-    stall(${Number(config.executionDuration) || 0});
-    `
-  }
-
-  script += `
-    console.log('script ID ${config.id} done');
+    stall(${Number(executionDuration)});
+    console.log('script ID ${id} done');
   `
 
   return {

@@ -2,11 +2,12 @@ import {
   PageConfig,
   NetworkResourceResponse,
   IFactory,
-  ScriptInclusionConfig,
   ResourceType,
   ScriptInclusionType,
-  StyleInclusionConfig,
   StylesheetInclusionType,
+  ScriptConfig,
+  StyleConfig,
+  withDefaults,
 } from '../types'
 
 const EMPTY_BODY = `
@@ -21,8 +22,8 @@ const EMPTY_BODY = `
 </html>
 `.trim()
 
-function createScriptTag(config: ScriptInclusionConfig, factory: IFactory): string {
-  const {inclusionType = ScriptInclusionType.External} = config
+function createScriptTag(config: ScriptConfig, factory: IFactory): string {
+  const {inclusionType} = withDefaults(config)
   const scriptResource = factory.create(config)
   if (inclusionType === ScriptInclusionType.Inline) {
     return `<script>${scriptResource.body}</script>`
@@ -37,8 +38,8 @@ function createScriptTag(config: ScriptInclusionConfig, factory: IFactory): stri
   }
 }
 
-function createStylesheetTag(config: StyleInclusionConfig, factory: IFactory): string {
-  const {inclusionType = StylesheetInclusionType.External} = config
+function createStylesheetTag(config: StyleConfig, factory: IFactory): string {
+  const {inclusionType} = withDefaults(config)
   const styleResource = factory.create(config)
   if (inclusionType === StylesheetInclusionType.Inline) {
     return `<style>${styleResource.body}</style>`
