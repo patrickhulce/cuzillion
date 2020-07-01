@@ -1,6 +1,18 @@
 import {h, Fragment} from 'preact'
-import {PageConfig, ResourceType, ScriptConfig, StyleConfig} from '../types'
-import {ButtonGroup, Button} from './components/button'
+import {
+  PageConfig,
+  ResourceType,
+  ScriptConfig,
+  StyleConfig,
+  StylesheetInclusionType,
+  withDefaults,
+  ScriptInclusionType,
+} from '../types'
+import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
+import cloneDeep from 'lodash-es/cloneDeep'
+import get from 'lodash-es/get'
+import set from 'lodash-es/set'
+import {TrashIcon} from './components/icons'
 
 interface ConfigProps<T = PageConfig> {
   config: T
@@ -11,20 +23,83 @@ interface ConfigProps<T = PageConfig> {
 
 type PageChildConfig = PageConfig['body'][0]
 
+function clickHandler<T = PageConfig>(
+  config: Partial<T> | null,
+  props: Omit<ConfigProps, 'config'>,
+): () => void {
+  return () => {
+    const cloned = cloneDeep(props.rootConfig)
+    if (config === null) {
+      const parent = get(cloned, props.configPath.slice(0, props.configPath.length - 1))
+      const childKey = props.configPath[props.configPath.length - 1]
+      if (Array.isArray(parent)) {
+        parent.splice(Number(childKey), 1)
+      } else {
+        delete parent[childKey]
+      }
+    } else {
+      set(cloned, props.configPath, {...get(cloned, props.configPath), ...config})
+    }
+
+    props.setRootConfig(cloned)
+  }
+}
+
 const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
+  const config = withDefaults(props.config)
   return (
     <div className="rounded bg-blue-900 p-2 mb-2">
-      <span>Script</span>
-      <div>type:</div>
+      <div className="w-full flex items-center">
+        <div className="w-full sm:w-auto sm:mr-4">Script</div>
+        <div className="w-full sm:w-auto sm:mr-4">
+          <RadioButtonGroup
+            size="xs"
+            color="teal"
+            value={config.inclusionType}
+            options={[
+              {label: 'External', value: ScriptInclusionType.External},
+              {label: 'Defer', value: ScriptInclusionType.ExternalDefer},
+              {label: 'Async', value: ScriptInclusionType.ExternalAsync},
+              {label: 'Inline', value: ScriptInclusionType.Inline},
+            ]}
+            setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
+          />
+        </div>
+        <div className="w-full sm:w-auto sm:mr-4 flex items-center">
+          <Button solo onClick={() => clickHandler(null, props)()} size="xs">
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
 
 const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
+  const config = withDefaults(props.config)
   return (
     <div className="rounded bg-blue-900 p-2 mb-2">
-      <span>Style</span>
-      <div>type:</div>
+      <div className="w-full flex items-center">
+        <div className="w-full sm:w-auto sm:mr-4">Style</div>
+        <div className="w-full sm:w-auto sm:mr-4">
+          <RadioButtonGroup
+            size="xs"
+            color="teal"
+            value={config.inclusionType}
+            options={[
+              {label: 'External', value: StylesheetInclusionType.External},
+              {label: 'Async', value: StylesheetInclusionType.ExternalAsync},
+              {label: 'Inline', value: StylesheetInclusionType.Inline},
+            ]}
+            setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
+          />
+        </div>
+        <div className="w-full sm:w-auto sm:mr-4 flex items-center">
+          <Button solo onClick={() => clickHandler(null, props)()} size="xs">
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -77,7 +152,7 @@ export const PageConfigurator = (props: Omit<ConfigProps, 'rootConfig'>) => {
 
   return (
     <div className="w-full rounded bg-blue-900 p-2">
-      <div className="p-2">Page Configuration</div>
+      <div className="pb-2">Page Configuration</div>
       <PageSubtarget
         label="head"
         items={headItems}
