@@ -85,7 +85,7 @@ describe('.createServer', () => {
         expect(redirectResponse.status).toEqual(302)
         expect(redirectResponse.headers).toHaveProperty('location')
         expect(redirectResponse.headers.location).toMatchInlineSnapshot(
-          `"/factory/page.html?config=eyJ0eXBlIjoicCIsInJlZGlyZWN0Q291bnQiOjB9"`,
+          `"/factory/page.html?config=eyJ0IjoicCJ9"`,
         )
 
         if (typeof redirectResponse.headers.location !== 'string') throw new Error('impossible')
@@ -102,7 +102,7 @@ describe('.createServer', () => {
         expect(redirectResponse.status).toEqual(302)
         expect(redirectResponse.headers).toHaveProperty('location')
         expect(redirectResponse.headers.location).toMatchInlineSnapshot(
-          `"/factory/page.html?config=eyJ0eXBlIjoicCIsInJlZGlyZWN0Q291bnQiOjF9"`,
+          `"/factory/page.html?config=eyJ0IjoicCIsInJlZGlyZWN0Q291bnQiOjF9"`,
         )
 
         if (typeof redirectResponse.headers.location !== 'string') throw new Error('never')

@@ -58,22 +58,6 @@ export class Factory implements IFactory {
     }
   }
 
-  public recursivelyFillIds(config: CuzillionConfig, state?: {current: number}): CuzillionConfig {
-    state = state || {current: 0}
-
-    config.id = config.id || `${state.current++}`
-    switch (config.type) {
-      case ResourceType.Page:
-        if (config.head)
-          config.head = config.head.map((child) => this.recursivelyFillIds(child, state) as any)
-        if (config.body)
-          config.body = config.body.map((child) => this.recursivelyFillIds(child, state) as any)
-        break
-    }
-
-    return config
-  }
-
   public static defaultInstance(): IFactory {
     const factory = new Factory(DEFAULT_URL_MAP)
     factory.getLinkTo = factory.getLinkTo.bind(factory)

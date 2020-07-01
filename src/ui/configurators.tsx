@@ -10,9 +10,9 @@ import {
   TextConfig,
 } from '../types'
 import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
-import cloneDeep from 'lodash-es/cloneDeep'
-import get from 'lodash-es/get'
-import set from 'lodash-es/set'
+import cloneDeep from 'lodash/cloneDeep'
+import get from 'lodash/get'
+import set from 'lodash/set'
 import {TrashIcon} from './components/icons'
 
 interface ConfigProps<T = PageConfig> {

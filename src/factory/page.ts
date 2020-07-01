@@ -8,7 +8,9 @@ import {
   ScriptConfig,
   StyleConfig,
   withDefaults,
+  walkConfig,
 } from '../types'
+import cloneDeep from 'lodash/cloneDeep'
 
 const EMPTY_BODY = `
 <!DOCTYPE html>
@@ -75,12 +77,21 @@ function createHtmlChildren(children: PageConfig['body'], factory: IFactory): st
   return html
 }
 
+function initializeIds(config: PageConfig): void {
+  const state = {count: 1}
+  walkConfig(config, (config) => {
+    if (!config.id) config.id = `${state.count++}`
+  })
+}
+
 export function createPage(
-  config: PageConfig,
+  config_: PageConfig,
   factory: IFactory,
 ): Omit<NetworkResourceResponse, 'link'> {
+  const config = cloneDeep(config_)
+  initializeIds(config)
+
   let body = EMPTY_BODY
-  config = factory.recursivelyFillIds(config) as any
   if (config.head) body = body.replace('<!--HEAD-->', createHtmlChildren(config.head, factory))
   if (config.body) body = body.replace('<!--BODY-->', createHtmlChildren(config.body, factory))
 

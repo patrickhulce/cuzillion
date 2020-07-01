@@ -68,7 +68,6 @@ export interface IFactory {
   getLinkTo(config: CuzillionConfig): string
   create(config: CuzillionConfig): NetworkResourceResponse
   injectBytes(config: CuzillionConfig, body: string | undefined): string | undefined
-  recursivelyFillIds(config: CuzillionConfig, state?: {current: number}): CuzillionConfig
 }
 
 interface ConfigDefaultsMap {
@@ -132,4 +131,15 @@ export function withDefaults<T extends CuzillionConfig>(config: T): Required<T> 
   const configWithDefaults =
     config.type in configDefaults ? configDefaults[config.type](config as any) : config
   return configWithDefaults as any
+}
+
+export function walkConfig(config: CuzillionConfig, processFn: (c: CuzillionConfig) => void): void {
+  processFn(config)
+
+  switch (config.type) {
+    case ResourceType.Page:
+      if (config.body) config.body.forEach((child) => walkConfig(child, processFn))
+      if (config.head) config.head.forEach((child) => walkConfig(child, processFn))
+      break
+  }
 }
