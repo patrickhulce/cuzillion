@@ -8,12 +8,13 @@ import {
   withDefaults,
   ScriptInclusionType,
   TextConfig,
+  EMPTY_PAGE,
 } from '../types'
 import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import set from 'lodash/set'
-import {TrashIcon} from './components/icons'
+import {TrashIcon, RefreshIcon} from './components/icons'
 
 interface ConfigProps<T = PageConfig> {
   config: T
@@ -182,7 +183,14 @@ export const PageConfigurator = (props: Omit<ConfigProps, 'rootConfig'>) => {
 
   return (
     <div className="w-full rounded bg-blue-900 p-2">
-      <div className="pb-2">Page Configuration</div>
+      <div className="flex pb-2">
+        <div className="flex-grow">Page Configuration</div>
+        <div className="text-black">
+          <Button solo onClick={() => props.setRootConfig(EMPTY_PAGE)}>
+            <RefreshIcon />
+          </Button>
+        </div>
+      </div>
       <PageSubtarget
         label="head"
         items={headItems}

@@ -132,6 +132,8 @@ const configDefaults: ConfigDefaultsMap = {
   },
 }
 
+export const EMPTY_PAGE: PageConfig = {type: ConfigType.Page, body: [{type: ConfigType.Text}]}
+
 export function isNetworkResource(config: CuzillionConfig): config is NetworkResourceConfig {
   return config.type !== ConfigType.Text
 }

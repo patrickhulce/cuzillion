@@ -1,10 +1,8 @@
 import {h, Fragment} from 'preact'
 import {useState, useEffect} from 'preact/hooks'
-import {ConfigType, PageConfig} from '../types'
+import {ConfigType, PageConfig, EMPTY_PAGE} from '../types'
 import {serializeConfig, deserializeConfig} from '../serialization'
 import {PageConfigurator} from './configurators'
-
-const EMPTY_PAGE: PageConfig = {type: ConfigType.Page, body: [{type: ConfigType.Text}]}
 
 function getDefaultPageConfig(): PageConfig {
   const hashParams = new URLSearchParams(location.hash.replace('#', '?'))
