@@ -46,27 +46,28 @@ export const App = () => {
             <div className="w-2/12"></div>
           </div>
         </nav>
-        <div className="flex flex-col items-center flex-grow p-4 shadow">
+        <main className="flex flex-col items-center flex-grow p-4 shadow">
           <div className="flex w-full mb-4 text-sm">
-            <div className="flex flex-wrap w-1/2">
+            <label className="flex flex-wrap w-1/2">
               <div className="mr-4 text-gray-400">Editor URL</div>
               <input
-                className="opacity-75 flex-grow mr-4 rounded text-gray-800 px-1"
+                className="flex-grow mr-4 rounded text-gray-800 px-1"
                 type="text"
                 value={window.location.href}
                 onClick={(e) => {
                   if (!(e.target instanceof HTMLInputElement)) return
                   e.target.select()
+                  e.target.value = window.location.href
                   if (!navigator.clipboard) return
                   navigator.clipboard.writeText(window.location.href)
                 }}
                 onKeyDown={(e) => e.preventDefault()}
               />
-            </div>
-            <div className="flex flex-wrap w-1/2">
+            </label>
+            <label className="flex flex-wrap w-1/2">
               <div className="mr-4 text-gray-400">Page URL</div>
               <input
-                className="opacity-75 flex-grow mr-4 rounded text-gray-800 px-1"
+                className="flex-grow mr-4 rounded text-gray-800 px-1"
                 type="text"
                 value={iframeUrl}
                 onClick={(e) => {
@@ -77,13 +78,17 @@ export const App = () => {
                 }}
                 onKeyDown={(e) => e.preventDefault()}
               />
-            </div>
+            </label>
           </div>
           <PageConfigurator config={config} setRootConfig={setConfig} configPath={[]} />
-        </div>
+        </main>
       </div>
       <div className="w-full sm:w-1/2 h-screen bg-white">
-        <iframe className="w-full h-screen" src={iframeUrl}></iframe>
+        <iframe
+          title="Configured Cuzillion Page"
+          className="w-full h-screen"
+          src={iframeUrl}
+        ></iframe>
       </div>
     </div>
   )

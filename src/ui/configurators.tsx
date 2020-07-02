@@ -110,6 +110,7 @@ const NetworkResourceConfiguratorSection = (
 const ConfiguratorButton = (props: {
   className?: string
   onClick?: () => void
+  title: string
   icon: (props: {className?: string}) => JSX.Element
   toggle?: [boolean, (b: boolean) => void]
   flagged?: boolean
@@ -122,6 +123,7 @@ const ConfiguratorButton = (props: {
     <div className={clsx('h-6 p-1 flex items-center rounded ', props.className)}>
       <Button
         solo
+        title={props.title}
         flagged={props.toggle && props.toggle[0]}
         selected={props.toggle && props.toggle[0]}
         size="xs"
@@ -148,18 +150,24 @@ const Configurator = (
         <div className="flex-grow">{props.name}</div>
         <div className="w-auto h-6 flex items-center">
           <ConfiguratorButton
+            title={`Toggle ${props.config.type} Settings`}
             icon={SettingsIcon}
             toggle={[isVisible, setIsVisible]}
             flagged={hasSettings}
           />
           {isNetworkResource(config) ? (
             <ConfiguratorButton
+              title="Toggle Network Settings"
               icon={NetworkIcon}
               toggle={[isNetVisible, setIsNetVisible]}
               flagged={hasNetworkSettings}
             />
           ) : null}
-          <ConfiguratorButton icon={TrashIcon} onClick={() => clickHandler(null, props)()} />
+          <ConfiguratorButton
+            title="Delete"
+            icon={TrashIcon}
+            onClick={() => clickHandler(null, props)()}
+          />
         </div>
       </div>
       {isVisible || isNetVisible ? (
@@ -184,12 +192,12 @@ const ConfiguratorOption = (props: {
   if (lgTargetSize === '1/2') width = `w-full lg:w-1/2`
   if (lgTargetSize === '1/4') width = `w-full sm:w-1/2 lg:w-1/4`
   return (
-    <div className={clsx('my-2', width)}>
+    <label className={clsx('my-2', width)}>
       <div className="w-full text-xs text-gray-500 mb-1 mr-4 border-b border-blue-800">
         {props.label}
       </div>
       <div className="w-full flex">{props.children}</div>
-    </div>
+    </label>
   )
 }
 
@@ -326,13 +334,21 @@ const PageSubtarget = (
         />
       ))}
       <ButtonGroup className="py-2 text-sm">
-        <Button onClick={clickHandler(ConfigType.Script)}>Script</Button>
-        <Button onClick={clickHandler(ConfigType.Stylesheet)}>Stylesheet</Button>
+        <Button title="Add a script element" onClick={clickHandler(ConfigType.Script)}>
+          Script
+        </Button>
+        <Button title="Add a stylesheet element" onClick={clickHandler(ConfigType.Stylesheet)}>
+          Stylesheet
+        </Button>
         {props.label === 'body' ? (
-          <Button onClick={clickHandler(ConfigType.Image)}>Image</Button>
+          <Button title="Add an image element" onClick={clickHandler(ConfigType.Image)}>
+            Image
+          </Button>
         ) : null}
         {props.label === 'body' ? (
-          <Button onClick={clickHandler(ConfigType.Text)}>Text</Button>
+          <Button title="Add a text element" onClick={clickHandler(ConfigType.Text)}>
+            Text
+          </Button>
         ) : null}
       </ButtonGroup>
     </div>
@@ -348,7 +364,7 @@ export const PageConfigurator = (props: Omit<ConfigProps, 'rootConfig'>) => {
       <div className="flex pb-2">
         <div className="flex-grow">Page Configuration</div>
         <div className="text-black">
-          <Button solo onClick={() => props.setRootConfig(EMPTY_PAGE)}>
+          <Button title="Reset page to empty" solo onClick={() => props.setRootConfig(EMPTY_PAGE)}>
             <RefreshIcon />
           </Button>
         </div>

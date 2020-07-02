@@ -9,6 +9,7 @@ interface ButtonProps {
   size?: 'lg' | 'sm' | 'xs'
   color?: 'blue' | 'gray' | 'teal'
   className?: string
+  title: string
   onClick: () => void
 }
 
@@ -54,7 +55,7 @@ export const Button = (props: ButtonProps) => {
   })
 
   return (
-    <button className={className} onClick={props.onClick}>
+    <button title={props.title} className={className} onClick={props.onClick}>
       {props.children}
     </button>
   )
@@ -76,6 +77,7 @@ export function RadioButtonGroup<T>(props: {
       {props.options.map((option, idx) => {
         return (
           <Button
+            title={option.label}
             size={props.size}
             color={props.color}
             selected={props.value === option.value}

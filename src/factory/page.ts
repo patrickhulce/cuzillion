@@ -17,6 +17,7 @@ const EMPTY_BODY = `
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <title>Cuzillion Example</title>
     <!--HEAD-->
   </head>
   <body>
