@@ -4,6 +4,7 @@ import {NetworkResourceResponse, NetworkResourceConfig, isNetworkResource} from 
 import {wait} from './utils'
 import {deserializeConfig, serializeConfig} from './serialization'
 import debug from 'debug'
+import compression from 'compression'
 import {Factory} from './factory/factory'
 
 const log = debug('cuzillion:server')
@@ -60,6 +61,7 @@ export function createServer(options: {
   const factory = Factory.defaultInstance()
   const app = express()
   app.get('/', (req, res) => res.sendFile(indexHtml))
+  app.use('/ui/', compression())
   app.use('/ui/', express.static(staticDir))
   app.use('/api/page.html', respondWithFactory(factory.create, factory.injectBytes))
   app.use('/api/script.js', respondWithFactory(factory.create, factory.injectBytes))
