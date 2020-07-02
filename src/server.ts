@@ -61,10 +61,10 @@ export function createServer(options: {
   const app = express()
   app.get('/', (req, res) => res.sendFile(indexHtml))
   app.use('/ui/', express.static(staticDir))
-  app.use('/factory/page.html', respondWithFactory(factory.create, factory.injectBytes))
-  app.use('/factory/script.js', respondWithFactory(factory.create, factory.injectBytes))
-  app.use('/factory/style.css', respondWithFactory(factory.create, factory.injectBytes))
-  app.use('/factory/image.jpg', respondWithFactory(factory.create, factory.injectBytes))
+  app.use('/api/page.html', respondWithFactory(factory.create, factory.injectBytes))
+  app.use('/api/script.js', respondWithFactory(factory.create, factory.injectBytes))
+  app.use('/api/style.css', respondWithFactory(factory.create, factory.injectBytes))
+  app.use('/api/image.jpg', respondWithFactory(factory.create, factory.injectBytes))
 
   return new Promise((resolve, reject) => {
     const server = app.listen(targetPort, () => {

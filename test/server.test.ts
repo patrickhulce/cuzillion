@@ -23,7 +23,7 @@ describe('.createServer', () => {
   describe('factory routes', () => {
     describe('statusCode', () => {
       it('200', async () => {
-        const response = await fetch('/factory/page.html', {
+        const response = await fetch('/api/page.html', {
           type: ConfigType.Page,
         })
 
@@ -34,7 +34,7 @@ describe('.createServer', () => {
       })
 
       it('403', async () => {
-        const response = await fetch('/factory/page.html', {
+        const response = await fetch('/api/page.html', {
           type: ConfigType.Page,
           statusCode: 403,
         })
@@ -45,7 +45,7 @@ describe('.createServer', () => {
 
     describe('sizeInBytes', () => {
       it('sets the page body size', async () => {
-        const response = await fetch('/factory/page.html', {
+        const response = await fetch('/api/page.html', {
           type: ConfigType.Page,
           sizeInBytes: 14000,
         })
@@ -55,7 +55,7 @@ describe('.createServer', () => {
       })
 
       it('sets the script body size', async () => {
-        const response = await fetch('/factory/script.js', {
+        const response = await fetch('/api/script.js', {
           type: ConfigType.Script,
           sizeInBytes: 14000,
         })
@@ -65,7 +65,7 @@ describe('.createServer', () => {
       })
 
       it('sets the stylesheet body size', async () => {
-        const response = await fetch('/factory/style.css', {
+        const response = await fetch('/api/style.css', {
           type: ConfigType.Stylesheet,
           sizeInBytes: 14000,
         })
@@ -77,7 +77,7 @@ describe('.createServer', () => {
 
     describe('redirects', () => {
       it('single redirect', async () => {
-        const redirectResponse = await fetch('/factory/page.html', {
+        const redirectResponse = await fetch('/api/page.html', {
           type: ConfigType.Page,
           redirectCount: 1,
         })
@@ -85,7 +85,7 @@ describe('.createServer', () => {
         expect(redirectResponse.status).toEqual(302)
         expect(redirectResponse.headers).toHaveProperty('location')
         expect(redirectResponse.headers.location).toMatchInlineSnapshot(
-          `"/factory/page.html?config=eyJ0IjoicCJ9"`,
+          `"/api/page.html?config=eyJ0IjoicCJ9"`,
         )
 
         if (typeof redirectResponse.headers.location !== 'string') throw new Error('impossible')
@@ -94,7 +94,7 @@ describe('.createServer', () => {
       })
 
       it('multiple redirects', async () => {
-        const redirectResponse = await fetch('/factory/page.html', {
+        const redirectResponse = await fetch('/api/page.html', {
           type: ConfigType.Page,
           redirectCount: 2,
         })
@@ -102,14 +102,14 @@ describe('.createServer', () => {
         expect(redirectResponse.status).toEqual(302)
         expect(redirectResponse.headers).toHaveProperty('location')
         expect(redirectResponse.headers.location).toMatchInlineSnapshot(
-          `"/factory/page.html?config=eyJ0IjoicCIsInJlZGlyZWN0Q291bnQiOjF9"`,
+          `"/api/page.html?config=eyJ0IjoicCIsInJlZGlyZWN0Q291bnQiOjF9"`,
         )
 
         if (typeof redirectResponse.headers.location !== 'string') throw new Error('never')
         const secondRedirectResponse = await fetch(redirectResponse.headers.location)
         expect(secondRedirectResponse).toMatchObject({
           status: 302,
-          headers: {location: expect.stringContaining('/factory/page.html')},
+          headers: {location: expect.stringContaining('/api/page.html')},
         })
 
         if (typeof secondRedirectResponse.headers.location !== 'string') throw new Error('never')
@@ -119,7 +119,7 @@ describe('.createServer', () => {
 
       it('with fetch delay', async () => {
         const start = Date.now()
-        const redirectResponse = await fetch('/factory/page.html', {
+        const redirectResponse = await fetch('/api/page.html', {
           type: ConfigType.Page,
           redirectCount: 1,
           fetchDelay: 250,

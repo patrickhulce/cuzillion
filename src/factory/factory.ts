@@ -7,10 +7,10 @@ import {injectTextBytes, createText} from './text'
 import {createImage} from './image'
 
 const DEFAULT_URL_MAP = {
-  [ConfigType.Page]: '/factory/page.html',
-  [ConfigType.Script]: '/factory/script.js',
-  [ConfigType.Stylesheet]: '/factory/style.css',
-  [ConfigType.Image]: '/factory/image.jpg',
+  [ConfigType.Page]: '/api/page.html',
+  [ConfigType.Script]: '/api/script.js',
+  [ConfigType.Stylesheet]: '/api/style.css',
+  [ConfigType.Image]: '/api/image.jpg',
   [ConfigType.Text]: '/not-supported',
 }
 

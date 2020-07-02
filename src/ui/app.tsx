@@ -19,7 +19,7 @@ const DEFAULT_STATE = getDefaultPageConfig()
 export const App = () => {
   const [config, setConfig] = useState<PageConfig>(DEFAULT_STATE)
   const iframeUrl = new URL(
-    `/factory/page.html?config=${serializeConfig(config)}`,
+    `/api/page.html?config=${serializeConfig(config)}`,
     window.location.origin,
   ).href
 
