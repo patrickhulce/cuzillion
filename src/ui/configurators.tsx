@@ -11,6 +11,8 @@ import {
   EMPTY_PAGE,
   ImageConfig,
   NetworkResourceConfig,
+  CuzillionConfig,
+  isNetworkResource,
 } from '../types'
 import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
@@ -51,13 +53,12 @@ function clickHandler<T = PageConfig>(
   }
 }
 
-const NetworkResourceConfiguratorSection = (
-  props: ConfigProps<Required<NetworkResourceConfig>>,
-) => {
+const NetworkResourceConfiguratorSection = (props: ConfigProps<NetworkResourceConfig>) => {
+  const configWithDefaults = withDefaults(props.config)
   const typeDefaults = withDefaults<NetworkResourceConfig>({type: props.config.type})
   const [isVisible, setIsVisible] = useState(
-    props.config.fetchDelay !== typeDefaults.fetchDelay ||
-      props.config.redirectCount !== typeDefaults.redirectCount,
+    configWithDefaults.fetchDelay !== typeDefaults.fetchDelay ||
+      configWithDefaults.redirectCount !== typeDefaults.redirectCount,
   )
 
   return (
@@ -75,7 +76,7 @@ const NetworkResourceConfiguratorSection = (
             <input
               className="text-xs w-10 px-1 rounded text-black mr-2"
               type="text"
-              value={props.config.fetchDelay}
+              value={configWithDefaults.fetchDelay}
               onChange={(e) => clickHandler({fetchDelay: Number(e.target.value)}, props)()}
             />
             ms
@@ -86,142 +87,119 @@ const NetworkResourceConfiguratorSection = (
   )
 }
 
+const Configurator = (
+  props: ConfigProps<CuzillionConfig> & {name: string; children: JSX.Element | JSX.Element[]},
+) => {
+  const config = withDefaults(props.config)
+  return (
+    <div className="rounded bg-blue-900 p-2 mb-2">
+      <div className="w-full flex items-center">
+        <div className="w-full sm:w-auto mr-4">{props.name}</div>
+        <div className="w-full sm:w-auto mr-4 h-6 flex items-center">{props.children}</div>
+        {isNetworkResource(config) ? (
+          <NetworkResourceConfiguratorSection {...props} config={config} />
+        ) : null}
+        <div className="w-full sm:w-auto mr-4 flex items-center">
+          <Button solo onClick={() => clickHandler(null, props)()} size="xs">
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
 const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
   const config = withDefaults(props.config)
   const scriptDefaults = withDefaults<ScriptConfig>({type: ConfigType.Script})
   const [isVisible, setIsVisible] = useState(
     config.executionDuration !== scriptDefaults.executionDuration,
   )
+
   return (
-    <div className="rounded bg-blue-900 p-2 mb-2">
-      <div className="w-full flex items-center flex-wrap">
-        <div className="w-full sm:w-auto mr-4">Script</div>
-        <div className="w-full sm:w-auto mr-4 h-6 flex items-center">
-          <RadioButtonGroup
-            size="xs"
-            color="teal"
-            value={config.inclusionType}
-            options={[
-              {label: 'External', value: ScriptInclusionType.External},
-              {label: 'Defer', value: ScriptInclusionType.ExternalDefer},
-              {label: 'Async', value: ScriptInclusionType.ExternalAsync},
-              {label: 'Inline', value: ScriptInclusionType.Inline},
-            ]}
-            setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
-          />
-          <Button solo onClick={() => setIsVisible(!isVisible)} size="xs">
-            <SettingsIcon className="h-4 w-4" />
-          </Button>
-          {isVisible ? (
-            <div className="ml-2 flex text-xs">
-              <div className="">
-                <input
-                  className="text-xs w-10 px-1 rounded text-black mr-2"
-                  type="text"
-                  value={props.config.executionDuration}
-                  onChange={(e) =>
-                    clickHandler({executionDuration: Number(e.target.value)}, props)()
-                  }
-                />
-                ms
-              </div>
-            </div>
-          ) : null}
+    <Configurator name="Script" {...props}>
+      <RadioButtonGroup
+        size="xs"
+        color="teal"
+        value={config.inclusionType}
+        options={[
+          {label: 'External', value: ScriptInclusionType.External},
+          {label: 'Defer', value: ScriptInclusionType.ExternalDefer},
+          {label: 'Async', value: ScriptInclusionType.ExternalAsync},
+          {label: 'Inline', value: ScriptInclusionType.Inline},
+        ]}
+        setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
+      />
+      <Button solo onClick={() => setIsVisible(!isVisible)} size="xs">
+        <SettingsIcon className="h-4 w-4" />
+      </Button>
+      {isVisible ? (
+        <div className="ml-2 flex text-xs">
+          <div className="">
+            <input
+              className="text-xs w-10 px-1 rounded text-black mr-2"
+              type="text"
+              value={props.config.executionDuration}
+              onChange={(e) => clickHandler({executionDuration: Number(e.target.value)}, props)()}
+            />
+            ms
+          </div>
         </div>
-        <NetworkResourceConfiguratorSection {...props} config={config} />
-        <div className="w-full sm:w-auto mr-4 flex items-center">
-          <Button solo onClick={() => clickHandler(null, props)()} size="xs">
-            <TrashIcon className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    </div>
+      ) : null}
+    </Configurator>
   )
 }
 
 const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
   const config = withDefaults(props.config)
   return (
-    <div className="rounded bg-blue-900 p-2 mb-2">
-      <div className="w-full flex items-center flex-wrap">
-        <div className="w-full sm:w-auto mr-4">Style</div>
-        <div className="w-full sm:w-auto mr-4 h-6 flex items-center">
-          <RadioButtonGroup
-            size="xs"
-            color="teal"
-            value={config.inclusionType}
-            options={[
-              {label: 'External', value: StylesheetInclusionType.External},
-              {label: 'Async', value: StylesheetInclusionType.ExternalAsync},
-              {label: 'Inline', value: StylesheetInclusionType.Inline},
-            ]}
-            setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
-          />
-        </div>
-        <NetworkResourceConfiguratorSection {...props} config={config} />
-        <div className="w-full sm:w-auto mr-4 flex items-center">
-          <Button solo onClick={() => clickHandler(null, props)()} size="xs">
-            <TrashIcon className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    </div>
+    <Configurator name="Style" {...props}>
+      <RadioButtonGroup
+        size="xs"
+        color="teal"
+        value={config.inclusionType}
+        options={[
+          {label: 'External', value: StylesheetInclusionType.External},
+          {label: 'Async', value: StylesheetInclusionType.ExternalAsync},
+          {label: 'Inline', value: StylesheetInclusionType.Inline},
+        ]}
+        setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
+      />
+    </Configurator>
   )
 }
 
 const ImageConfigurator = (props: ConfigProps<ImageConfig>) => {
   const config = withDefaults(props.config)
   return (
-    <div className="rounded bg-blue-900 p-2 mb-2">
-      <div className="w-full flex items-center flex-wrap">
-        <div className="w-full sm:w-auto mr-4">Image</div>
-        <div className="w-full sm:w-auto mr-4">
-          <input
-            className="text-black rounded px-1 w-12"
-            type="text"
-            value={config.width}
-            onChange={(e) => clickHandler({width: Number(e.target.value)}, props)()}
-          />
-          <span className="mx-1">x</span>
-          <input
-            className="text-black rounded px-1 w-12"
-            type="text"
-            value={config.height}
-            onChange={(e) => clickHandler({height: Number(e.target.value)}, props)()}
-          />
-        </div>
-        <NetworkResourceConfiguratorSection {...props} config={config} />
-        <div className="w-full sm:w-auto mr-4 flex items-center">
-          <Button solo onClick={() => clickHandler(null, props)()} size="xs">
-            <TrashIcon className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    </div>
+    <Configurator name="Image" {...props}>
+      <input
+        className="text-black text-xs rounded px-1 w-12"
+        type="text"
+        value={config.width}
+        onChange={(e) => clickHandler({width: Number(e.target.value)}, props)()}
+      />
+      <span className="text-xs mx-1">x</span>
+      <input
+        className="text-black text-xs rounded px-1 w-12"
+        type="text"
+        value={config.height}
+        onChange={(e) => clickHandler({height: Number(e.target.value)}, props)()}
+      />
+    </Configurator>
   )
 }
 
 const TextConfigurator = (props: ConfigProps<TextConfig>) => {
   const config = withDefaults(props.config)
   return (
-    <div className="rounded bg-blue-900 p-2 mb-2">
-      <div className="w-full flex items-center">
-        <div className="w-full sm:w-auto mr-4">Text</div>
-        <div className="w-full sm:w-auto mr-4">
-          <input
-            className="text-black rounded px-1"
-            type="text"
-            value={config.textContent}
-            onChange={(e) => clickHandler({textContent: e.target.value}, props)()}
-          />
-        </div>
-        <div className="w-full sm:w-auto mr-4 flex items-center">
-          <Button solo onClick={() => clickHandler(null, props)()} size="xs">
-            <TrashIcon className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    </div>
+    <Configurator name="Image" {...props}>
+      <input
+        className="text-black text-xs rounded px-1"
+        type="text"
+        value={config.textContent}
+        onChange={(e) => clickHandler({textContent: e.target.value}, props)()}
+      />
+    </Configurator>
   )
 }
 
