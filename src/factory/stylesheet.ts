@@ -2,7 +2,8 @@ import {NetworkResourceResponse, IFactory, StyleConfig} from '../types'
 import {injectScriptBytes} from './script'
 
 const EMPTY_STYLESHEET = `
-html, body { height: 100vh; margin: 0; }
+html, body { height: 100vh; margin: 0; box-sizing: border-box; }
+body { padding: 10px; }
 `.trim()
 
 export function createStylesheet(

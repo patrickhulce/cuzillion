@@ -10,12 +10,15 @@ import {
   TextConfig,
   EMPTY_PAGE,
   ImageConfig,
+  NetworkResourceConfig,
 } from '../types'
 import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import set from 'lodash/set'
-import {TrashIcon, RefreshIcon} from './components/icons'
+import {TrashIcon, RefreshIcon, NetworkIcon} from './components/icons'
+import {useState} from 'preact/hooks'
+import clsx from 'clsx'
 
 interface ConfigProps<T = PageConfig> {
   config: T
@@ -48,6 +51,37 @@ function clickHandler<T = PageConfig>(
   }
 }
 
+const NetworkResourceConfiguratorSection = (
+  props: ConfigProps<Required<NetworkResourceConfig>>,
+) => {
+  const [isVisible, setIsVisible] = useState(false)
+
+  return (
+    <div
+      className={clsx('w-full sm:w-auto h-6 p-1 rounded mr-4 flex items-center', {
+        'bg-blue-800': isVisible,
+      })}
+    >
+      <Button solo onClick={() => setIsVisible(!isVisible)} size="xs">
+        <NetworkIcon className="h-4 w-4" />
+      </Button>
+      {isVisible ? (
+        <div className="ml-2 flex text-xs">
+          <div className="">
+            <input
+              className="text-xs w-10 px-1 rounded text-black mr-2"
+              type="text"
+              value={props.config.fetchDelay}
+              onChange={(e) => clickHandler({fetchDelay: Number(e.target.value)}, props)()}
+            />
+            ms
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
   const config = withDefaults(props.config)
   return (
@@ -68,6 +102,7 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
             setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
           />
         </div>
+        <NetworkResourceConfiguratorSection {...props} config={config} />
         <div className="w-full sm:w-auto mr-4 flex items-center">
           <Button solo onClick={() => clickHandler(null, props)()} size="xs">
             <TrashIcon className="h-4 w-4" />
@@ -97,6 +132,7 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
             setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
           />
         </div>
+        <NetworkResourceConfiguratorSection {...props} config={config} />
         <div className="w-full sm:w-auto mr-4 flex items-center">
           <Button solo onClick={() => clickHandler(null, props)()} size="xs">
             <TrashIcon className="h-4 w-4" />
@@ -128,7 +164,7 @@ const ImageConfigurator = (props: ConfigProps<ImageConfig>) => {
             onChange={(e) => clickHandler({height: Number(e.target.value)}, props)()}
           />
         </div>
-        <div className="w-full sm:w-auto mr-4"></div>
+        <NetworkResourceConfiguratorSection {...props} config={config} />
         <div className="w-full sm:w-auto mr-4 flex items-center">
           <Button solo onClick={() => clickHandler(null, props)()} size="xs">
             <TrashIcon className="h-4 w-4" />
