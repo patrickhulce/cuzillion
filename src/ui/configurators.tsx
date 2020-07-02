@@ -98,7 +98,7 @@ const NetworkResourceConfiguratorSection = (
             className="text-xs w-10 px-1 rounded text-black mr-2"
             type="text"
             value={Math.ceil(props.config.sizeInBytes / 1024)}
-            onChange={(e) => clickHandler({sizeInBytes: Number(e.target.value)}, props)()}
+            onChange={(e) => clickHandler({sizeInBytes: Number(e.target.value) * 1024}, props)()}
           />
           KiB
         </div>
