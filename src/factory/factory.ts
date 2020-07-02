@@ -47,6 +47,7 @@ export class Factory implements IFactory {
     body: Buffer | string | undefined,
   ): Buffer | string | undefined {
     if (body === undefined || !config.sizeInBytes) return body
+    if (config.sizeInBytes < body.length) return body
     if (Buffer.isBuffer(body)) throw new Error('Buffer byte injection not supported')
 
     switch (config.type) {

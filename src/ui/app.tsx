@@ -1,4 +1,4 @@
-import {h, Fragment} from 'preact'
+import {h} from 'preact'
 import {useState, useEffect} from 'preact/hooks'
 import {ConfigType, PageConfig, EMPTY_PAGE} from '../types'
 import {serializeConfig, deserializeConfig} from '../serialization'

@@ -1,4 +1,4 @@
-import {h, Fragment} from 'preact'
+import {h} from 'preact'
 import {
   PageConfig,
   ConfigType,
@@ -23,6 +23,7 @@ import set from 'lodash/set'
 import {TrashIcon, RefreshIcon, NetworkIcon, SettingsIcon} from './components/icons'
 import {useState} from 'preact/hooks'
 import clsx from 'clsx'
+import {PreactFragment} from './components/fragment'
 
 interface ConfigProps<T = PageConfig> {
   config: T
@@ -59,17 +60,50 @@ const NetworkResourceConfiguratorSection = (
   props: ConfigProps<Required<NetworkResourceConfig>>,
 ) => {
   return (
-    <div className="ml-2 flex text-xs">
-      <div className="">
-        <input
-          className="text-xs w-10 px-1 rounded text-black mr-2"
-          type="text"
-          value={props.config.fetchDelay}
-          onChange={(e) => clickHandler({fetchDelay: Number(e.target.value)}, props)()}
-        />
-        ms
-      </div>
-    </div>
+    <PreactFragment>
+      <ConfiguratorOption label="Fetch Delay" lgTargetSize="1/4">
+        <div className="text-xs">
+          <input
+            className="text-xs w-10 px-1 rounded text-black mr-2"
+            type="text"
+            value={props.config.fetchDelay}
+            onChange={(e) => clickHandler({fetchDelay: Number(e.target.value)}, props)()}
+          />
+          ms
+        </div>
+      </ConfiguratorOption>
+      <ConfiguratorOption label="Redirects" lgTargetSize="1/4">
+        <div className="text-xs">
+          <input
+            className="text-xs w-10 px-1 rounded text-black mr-2"
+            type="text"
+            value={props.config.redirectCount}
+            onChange={(e) => clickHandler({redirectCount: Number(e.target.value)}, props)()}
+          />
+        </div>
+      </ConfiguratorOption>
+      <ConfiguratorOption label="Status Code" lgTargetSize="1/4">
+        <div className="text-xs">
+          <input
+            className="text-xs w-10 px-1 rounded text-black mr-2"
+            type="text"
+            value={props.config.statusCode}
+            onChange={(e) => clickHandler({statusCode: Number(e.target.value)}, props)()}
+          />
+        </div>
+      </ConfiguratorOption>
+      <ConfiguratorOption label="Minimum Size" lgTargetSize="1/4">
+        <div className="text-xs">
+          <input
+            className="text-xs w-10 px-1 rounded text-black mr-2"
+            type="text"
+            value={Math.ceil(props.config.sizeInBytes / 1024)}
+            onChange={(e) => clickHandler({sizeInBytes: Number(e.target.value)}, props)()}
+          />
+          KiB
+        </div>
+      </ConfiguratorOption>
+    </PreactFragment>
   )
 }
 
@@ -113,6 +147,11 @@ const Configurator = (
       <div className="w-full flex items-center">
         <div className="flex-grow">{props.name}</div>
         <div className="w-auto h-6 flex items-center">
+          <ConfiguratorButton
+            icon={SettingsIcon}
+            toggle={[isVisible, setIsVisible]}
+            flagged={hasSettings}
+          />
           {isNetworkResource(config) ? (
             <ConfiguratorButton
               icon={NetworkIcon}
@@ -120,16 +159,11 @@ const Configurator = (
               flagged={hasNetworkSettings}
             />
           ) : null}
-          <ConfiguratorButton
-            icon={SettingsIcon}
-            toggle={[isVisible, setIsVisible]}
-            flagged={hasSettings}
-          />
           <ConfiguratorButton icon={TrashIcon} onClick={() => clickHandler(null, props)()} />
         </div>
       </div>
       {isVisible || isNetVisible ? (
-        <div className="w-full">
+        <div className="w-full flex flex-wrap">
           {isVisible ? props.children : null}
           {isNetVisible && isNetworkResource(config) ? (
             <NetworkResourceConfiguratorSection {...props} config={config} />
@@ -139,34 +173,56 @@ const Configurator = (
     </div>
   )
 }
+
+const ConfiguratorOption = (props: {
+  label: string
+  children: JSX.Element | JSX.Element[]
+  lgTargetSize?: 'full' | '1/2' | '1/4'
+}) => {
+  const {lgTargetSize = '1/2'} = props
+  let width = `w-${lgTargetSize}`
+  if (lgTargetSize === '1/2') width = `w-full lg:w-1/2`
+  if (lgTargetSize === '1/4') width = `w-full sm:w-1/2 lg:w-1/4`
+  return (
+    <div className={clsx('my-2', width)}>
+      <div className="w-full text-xs text-gray-500 mb-1 mr-4 border-b border-blue-800">
+        {props.label}
+      </div>
+      <div className="w-full flex">{props.children}</div>
+    </div>
+  )
+}
+
 const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
   const config = withDefaults(props.config)
 
   return (
     <Configurator name="Script" {...props}>
-      <RadioButtonGroup
-        size="xs"
-        color="teal"
-        value={config.inclusionType}
-        options={[
-          {label: 'External', value: ScriptInclusionType.External},
-          {label: 'Defer', value: ScriptInclusionType.ExternalDefer},
-          {label: 'Async', value: ScriptInclusionType.ExternalAsync},
-          {label: 'Inline', value: ScriptInclusionType.Inline},
-        ]}
-        setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
-      />
-      <div className="ml-2 flex text-xs">
-        <div className="">
+      <ConfiguratorOption label="Inclusion Method">
+        <RadioButtonGroup
+          size="xs"
+          color="teal"
+          value={config.inclusionType}
+          options={[
+            {label: 'External', value: ScriptInclusionType.External},
+            {label: 'Defer', value: ScriptInclusionType.ExternalDefer},
+            {label: 'Async', value: ScriptInclusionType.ExternalAsync},
+            {label: 'Inline', value: ScriptInclusionType.Inline},
+          ]}
+          setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
+        />
+      </ConfiguratorOption>
+      <ConfiguratorOption label="Execution Duration" lgTargetSize="1/4">
+        <div className="text-xs">
           <input
             className="text-xs w-10 px-1 rounded text-black mr-2"
             type="text"
-            value={props.config.executionDuration}
+            value={config.executionDuration}
             onChange={(e) => clickHandler({executionDuration: Number(e.target.value)}, props)()}
           />
           ms
         </div>
-      </div>
+      </ConfiguratorOption>
     </Configurator>
   )
 }
@@ -175,17 +231,19 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
   const config = withDefaults(props.config)
   return (
     <Configurator name="Style" {...props}>
-      <RadioButtonGroup
-        size="xs"
-        color="teal"
-        value={config.inclusionType}
-        options={[
-          {label: 'External', value: StylesheetInclusionType.External},
-          {label: 'Async', value: StylesheetInclusionType.ExternalAsync},
-          {label: 'Inline', value: StylesheetInclusionType.Inline},
-        ]}
-        setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
-      />
+      <ConfiguratorOption label="Inclusion Method">
+        <RadioButtonGroup
+          size="xs"
+          color="teal"
+          value={config.inclusionType}
+          options={[
+            {label: 'External', value: StylesheetInclusionType.External},
+            {label: 'Async', value: StylesheetInclusionType.ExternalAsync},
+            {label: 'Inline', value: StylesheetInclusionType.Inline},
+          ]}
+          setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
+        />
+      </ConfiguratorOption>
     </Configurator>
   )
 }
@@ -194,19 +252,21 @@ const ImageConfigurator = (props: ConfigProps<ImageConfig>) => {
   const config = withDefaults(props.config)
   return (
     <Configurator name="Image" {...props}>
-      <input
-        className="text-black text-xs rounded px-1 w-12"
-        type="text"
-        value={config.width}
-        onChange={(e) => clickHandler({width: Number(e.target.value)}, props)()}
-      />
-      <span className="text-xs mx-1">x</span>
-      <input
-        className="text-black text-xs rounded px-1 w-12"
-        type="text"
-        value={config.height}
-        onChange={(e) => clickHandler({height: Number(e.target.value)}, props)()}
-      />
+      <ConfiguratorOption label="Dimensions" lgTargetSize="1/4">
+        <input
+          className="text-black text-xs rounded px-1 w-10"
+          type="text"
+          value={config.width}
+          onChange={(e) => clickHandler({width: Number(e.target.value)}, props)()}
+        />
+        <span className="text-xs mx-1">x</span>
+        <input
+          className="text-black text-xs rounded px-1 w-10"
+          type="text"
+          value={config.height}
+          onChange={(e) => clickHandler({height: Number(e.target.value)}, props)()}
+        />
+      </ConfiguratorOption>
     </Configurator>
   )
 }
@@ -215,12 +275,14 @@ const TextConfigurator = (props: ConfigProps<TextConfig>) => {
   const config = withDefaults(props.config)
   return (
     <Configurator name="Text" {...props}>
-      <input
-        className="text-black rounded px-1"
-        type="text"
-        value={config.textContent}
-        onChange={(e) => clickHandler({textContent: e.target.value}, props)()}
-      />
+      <ConfiguratorOption label="Text Content" lgTargetSize="full">
+        <input
+          className="w-full text-black rounded px-1"
+          type="text"
+          value={config.textContent}
+          onChange={(e) => clickHandler({textContent: e.target.value}, props)()}
+        />
+      </ConfiguratorOption>
     </Configurator>
   )
 }
