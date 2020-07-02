@@ -16,7 +16,7 @@ import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import set from 'lodash/set'
-import {TrashIcon, RefreshIcon, NetworkIcon} from './components/icons'
+import {TrashIcon, RefreshIcon, NetworkIcon, SettingsIcon} from './components/icons'
 import {useState} from 'preact/hooks'
 import clsx from 'clsx'
 
@@ -54,7 +54,11 @@ function clickHandler<T = PageConfig>(
 const NetworkResourceConfiguratorSection = (
   props: ConfigProps<Required<NetworkResourceConfig>>,
 ) => {
-  const [isVisible, setIsVisible] = useState(false)
+  const typeDefaults = withDefaults<NetworkResourceConfig>({type: props.config.type})
+  const [isVisible, setIsVisible] = useState(
+    props.config.fetchDelay !== typeDefaults.fetchDelay ||
+      props.config.redirectCount !== typeDefaults.redirectCount,
+  )
 
   return (
     <div
@@ -84,11 +88,15 @@ const NetworkResourceConfiguratorSection = (
 
 const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
   const config = withDefaults(props.config)
+  const scriptDefaults = withDefaults<ScriptConfig>({type: ConfigType.Script})
+  const [isVisible, setIsVisible] = useState(
+    config.executionDuration !== scriptDefaults.executionDuration,
+  )
   return (
     <div className="rounded bg-blue-900 p-2 mb-2">
-      <div className="w-full flex items-center">
+      <div className="w-full flex items-center flex-wrap">
         <div className="w-full sm:w-auto mr-4">Script</div>
-        <div className="w-full sm:w-auto mr-4">
+        <div className="w-full sm:w-auto mr-4 h-6 flex items-center">
           <RadioButtonGroup
             size="xs"
             color="teal"
@@ -101,6 +109,24 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
             ]}
             setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
           />
+          <Button solo onClick={() => setIsVisible(!isVisible)} size="xs">
+            <SettingsIcon className="h-4 w-4" />
+          </Button>
+          {isVisible ? (
+            <div className="ml-2 flex text-xs">
+              <div className="">
+                <input
+                  className="text-xs w-10 px-1 rounded text-black mr-2"
+                  type="text"
+                  value={props.config.executionDuration}
+                  onChange={(e) =>
+                    clickHandler({executionDuration: Number(e.target.value)}, props)()
+                  }
+                />
+                ms
+              </div>
+            </div>
+          ) : null}
         </div>
         <NetworkResourceConfiguratorSection {...props} config={config} />
         <div className="w-full sm:w-auto mr-4 flex items-center">
@@ -117,9 +143,9 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
   const config = withDefaults(props.config)
   return (
     <div className="rounded bg-blue-900 p-2 mb-2">
-      <div className="w-full flex items-center">
+      <div className="w-full flex items-center flex-wrap">
         <div className="w-full sm:w-auto mr-4">Style</div>
-        <div className="w-full sm:w-auto mr-4">
+        <div className="w-full sm:w-auto mr-4 h-6 flex items-center">
           <RadioButtonGroup
             size="xs"
             color="teal"
@@ -147,7 +173,7 @@ const ImageConfigurator = (props: ConfigProps<ImageConfig>) => {
   const config = withDefaults(props.config)
   return (
     <div className="rounded bg-blue-900 p-2 mb-2">
-      <div className="w-full flex items-center">
+      <div className="w-full flex items-center flex-wrap">
         <div className="w-full sm:w-auto mr-4">Image</div>
         <div className="w-full sm:w-auto mr-4">
           <input
