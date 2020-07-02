@@ -13,6 +13,8 @@ import {
   NetworkResourceConfig,
   CuzillionConfig,
   isNetworkResource,
+  hasNonDefaultTypeSettings,
+  hasNonDefaultNetworkSettings,
 } from '../types'
 import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
@@ -53,36 +55,47 @@ function clickHandler<T = PageConfig>(
   }
 }
 
-const NetworkResourceConfiguratorSection = (props: ConfigProps<NetworkResourceConfig>) => {
-  const configWithDefaults = withDefaults(props.config)
-  const typeDefaults = withDefaults<NetworkResourceConfig>({type: props.config.type})
-  const [isVisible, setIsVisible] = useState(
-    configWithDefaults.fetchDelay !== typeDefaults.fetchDelay ||
-      configWithDefaults.redirectCount !== typeDefaults.redirectCount,
+const NetworkResourceConfiguratorSection = (
+  props: ConfigProps<Required<NetworkResourceConfig>>,
+) => {
+  return (
+    <div className="ml-2 flex text-xs">
+      <div className="">
+        <input
+          className="text-xs w-10 px-1 rounded text-black mr-2"
+          type="text"
+          value={props.config.fetchDelay}
+          onChange={(e) => clickHandler({fetchDelay: Number(e.target.value)}, props)()}
+        />
+        ms
+      </div>
+    </div>
   )
+}
+
+const ConfiguratorButton = (props: {
+  className?: string
+  onClick?: () => void
+  icon: (props: {className?: string}) => JSX.Element
+  toggle?: [boolean, (b: boolean) => void]
+  flagged?: boolean
+}) => {
+  let onClick = props.onClick
+  if (!onClick && props.toggle) onClick = () => props.toggle[1](!props.toggle[0])
+  if (!onClick) throw new Error('Must set either toggle or onClick')
 
   return (
-    <div
-      className={clsx('w-full sm:w-auto h-6 p-1 rounded mr-4 flex items-center', {
-        'bg-blue-800': isVisible,
-      })}
-    >
-      <Button solo onClick={() => setIsVisible(!isVisible)} size="xs">
-        <NetworkIcon className="h-4 w-4" />
+    <div className={clsx('h-6 p-1 flex items-center rounded ', props.className)}>
+      <Button
+        solo
+        flagged={props.toggle && props.toggle[0]}
+        selected={props.toggle && props.toggle[0]}
+        size="xs"
+        onClick={onClick}
+        color={props.flagged ? 'teal' : 'gray'}
+      >
+        {props.icon({className: 'h-4 w-4'})}
       </Button>
-      {isVisible ? (
-        <div className="ml-2 flex text-xs">
-          <div className="">
-            <input
-              className="text-xs w-10 px-1 rounded text-black mr-2"
-              type="text"
-              value={configWithDefaults.fetchDelay}
-              onChange={(e) => clickHandler({fetchDelay: Number(e.target.value)}, props)()}
-            />
-            ms
-          </div>
-        </div>
-      ) : null}
     </div>
   )
 }
@@ -91,29 +104,43 @@ const Configurator = (
   props: ConfigProps<CuzillionConfig> & {name: string; children: JSX.Element | JSX.Element[]},
 ) => {
   const config = withDefaults(props.config)
+  const hasSettings = hasNonDefaultTypeSettings(config)
+  const hasNetworkSettings = hasNonDefaultNetworkSettings(config)
+  const [isVisible, setIsVisible] = useState(hasSettings)
+  const [isNetVisible, setIsNetVisible] = useState(hasNetworkSettings)
   return (
     <div className="rounded bg-blue-900 p-2 mb-2">
       <div className="w-full flex items-center">
-        <div className="w-full sm:w-auto mr-4">{props.name}</div>
-        <div className="w-full sm:w-auto mr-4 h-6 flex items-center">{props.children}</div>
-        {isNetworkResource(config) ? (
-          <NetworkResourceConfiguratorSection {...props} config={config} />
-        ) : null}
-        <div className="w-full sm:w-auto mr-4 flex items-center">
-          <Button solo onClick={() => clickHandler(null, props)()} size="xs">
-            <TrashIcon className="h-4 w-4" />
-          </Button>
+        <div className="flex-grow">{props.name}</div>
+        <div className="w-auto h-6 flex items-center">
+          {isNetworkResource(config) ? (
+            <ConfiguratorButton
+              icon={NetworkIcon}
+              toggle={[isNetVisible, setIsNetVisible]}
+              flagged={hasNetworkSettings}
+            />
+          ) : null}
+          <ConfiguratorButton
+            icon={SettingsIcon}
+            toggle={[isVisible, setIsVisible]}
+            flagged={hasSettings}
+          />
+          <ConfiguratorButton icon={TrashIcon} onClick={() => clickHandler(null, props)()} />
         </div>
       </div>
+      {isVisible || isNetVisible ? (
+        <div className="w-full">
+          {isVisible ? props.children : null}
+          {isNetVisible && isNetworkResource(config) ? (
+            <NetworkResourceConfiguratorSection {...props} config={config} />
+          ) : null}
+        </div>
+      ) : null}
     </div>
   )
 }
 const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
   const config = withDefaults(props.config)
-  const scriptDefaults = withDefaults<ScriptConfig>({type: ConfigType.Script})
-  const [isVisible, setIsVisible] = useState(
-    config.executionDuration !== scriptDefaults.executionDuration,
-  )
 
   return (
     <Configurator name="Script" {...props}>
@@ -129,22 +156,17 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
         ]}
         setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
       />
-      <Button solo onClick={() => setIsVisible(!isVisible)} size="xs">
-        <SettingsIcon className="h-4 w-4" />
-      </Button>
-      {isVisible ? (
-        <div className="ml-2 flex text-xs">
-          <div className="">
-            <input
-              className="text-xs w-10 px-1 rounded text-black mr-2"
-              type="text"
-              value={props.config.executionDuration}
-              onChange={(e) => clickHandler({executionDuration: Number(e.target.value)}, props)()}
-            />
-            ms
-          </div>
+      <div className="ml-2 flex text-xs">
+        <div className="">
+          <input
+            className="text-xs w-10 px-1 rounded text-black mr-2"
+            type="text"
+            value={props.config.executionDuration}
+            onChange={(e) => clickHandler({executionDuration: Number(e.target.value)}, props)()}
+          />
+          ms
         </div>
-      ) : null}
+      </div>
     </Configurator>
   )
 }
@@ -192,9 +214,9 @@ const ImageConfigurator = (props: ConfigProps<ImageConfig>) => {
 const TextConfigurator = (props: ConfigProps<TextConfig>) => {
   const config = withDefaults(props.config)
   return (
-    <Configurator name="Image" {...props}>
+    <Configurator name="Text" {...props}>
       <input
-        className="text-black text-xs rounded px-1"
+        className="text-black rounded px-1"
         type="text"
         value={config.textContent}
         onChange={(e) => clickHandler({textContent: e.target.value}, props)()}

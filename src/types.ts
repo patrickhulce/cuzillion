@@ -1,3 +1,5 @@
+import isEqual from 'lodash/isEqual'
+
 interface NetworkResource {
   id?: string
   fetchDelay?: number
@@ -149,6 +151,20 @@ export function withDefaults<T extends CuzillionConfig>(config: T): Required<T> 
   const configWithDefaults =
     config.type in configDefaults ? configDefaults[config.type](config as any) : config
   return configWithDefaults as any
+}
+
+export function hasNonDefaultTypeSettings(config: CuzillionConfig): boolean {
+  const typeDefaults = withDefaults<CuzillionConfig>({type: config.type})
+  const networkKeys = Object.keys(defaultNetworkResource)
+  const typeKeys_ = Object.keys(typeDefaults).filter((key) => !networkKeys.includes(key))
+  const typeKeys = typeKeys_ as Array<keyof CuzillionConfig>
+  return typeKeys.some((key) => !isEqual(typeDefaults[key], config[key]))
+}
+
+export function hasNonDefaultNetworkSettings(config: CuzillionConfig): boolean {
+  if (!isNetworkResource(config)) return false
+  const networkKeys = Object.keys(defaultNetworkResource) as Array<keyof NetworkResource>
+  return networkKeys.some((key) => !isEqual(defaultNetworkResource[key], config[key]))
 }
 
 export function walkConfig(config: CuzillionConfig, processFn: (c: CuzillionConfig) => void): void {

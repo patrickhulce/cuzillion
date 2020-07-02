@@ -4,6 +4,7 @@ import clsx from 'clsx'
 interface ButtonProps {
   children: string | JSX.Element
   solo?: boolean
+  flagged?: boolean
   selected?: boolean
   size?: 'lg' | 'sm' | 'xs'
   color?: 'blue' | 'gray' | 'teal'
@@ -12,14 +13,19 @@ interface ButtonProps {
 }
 
 const CLASSES_FOR_COLOR = {
-  blue: 'bg-blue-500 hover:bg-blue-700 text-white',
-  teal: 'bg-teal-500 hover:bg-teal-700 text-white',
-  gray: 'bg-gray-300 hover:bg-gray-400 text-gray-800',
+  blue: 'hover:bg-blue-700 text-white',
+  teal: 'hover:bg-teal-700 text-white',
+  gray: 'hover:bg-gray-300 text-gray-800',
 }
-const SELECTED_CLASSES_FOR_COLOR = {
+const UNSELECTED_CLASSES_FOR_COLOR = {
   blue: 'bg-blue-800',
   teal: 'bg-teal-800',
-  gray: 'bg-gray-500',
+  gray: 'bg-gray-400',
+}
+const SELECTED_CLASSES_FOR_COLOR = {
+  blue: 'bg-blue-600',
+  teal: 'bg-teal-600',
+  gray: 'bg-gray-200',
 }
 const CLASSES_FOR_SIZE = {
   lg: 'text-lg py-1 px-2',
@@ -36,10 +42,14 @@ export const Button = (props: ButtonProps) => {
     [CLASSES_FOR_SIZE.lg]: size === 'lg',
     [CLASSES_FOR_SIZE.sm]: size === 'sm',
     [CLASSES_FOR_SIZE.xs]: size === 'xs',
+    [UNSELECTED_CLASSES_FOR_COLOR.blue]: color === 'blue' && !props.selected,
+    [UNSELECTED_CLASSES_FOR_COLOR.teal]: color === 'teal' && !props.selected,
+    [UNSELECTED_CLASSES_FOR_COLOR.gray]: color === 'gray' && !props.selected,
     [SELECTED_CLASSES_FOR_COLOR.blue]: color === 'blue' && props.selected,
     [SELECTED_CLASSES_FOR_COLOR.teal]: color === 'teal' && props.selected,
     [SELECTED_CLASSES_FOR_COLOR.gray]: color === 'gray' && props.selected,
     rounded: props.solo,
+    'shadow-outline': props.flagged,
     'first:rounded-l last:rounded-r': !props.solo,
   })
 
