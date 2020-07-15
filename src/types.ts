@@ -36,6 +36,11 @@ export enum StylesheetInclusionType {
   Inline = 'inline',
 }
 
+export enum ElementCreationMethod {
+  HTML = 'html',
+  DocumentWrite = 'docwrite',
+}
+
 export interface PageConfig extends NetworkResource {
   type: ConfigType.Page
   head?: Array<ScriptConfig | StyleConfig>
@@ -44,12 +49,14 @@ export interface PageConfig extends NetworkResource {
 
 export interface ScriptConfig extends NetworkResource {
   type: ConfigType.Script
+  creationMethod?: ElementCreationMethod
   executionDuration?: number
   inclusionType?: ScriptInclusionType
 }
 
 export interface StyleConfig extends NetworkResource {
   type: ConfigType.Stylesheet
+  creationMethod?: ElementCreationMethod
   backgroundColor?: string
   textColor?: string
   inclusionType?: StylesheetInclusionType
@@ -57,6 +64,7 @@ export interface StyleConfig extends NetworkResource {
 
 export interface TextConfig {
   type: ConfigType.Text
+  creationMethod?: ElementCreationMethod
   id?: string
   sizeInBytes?: number
   textContent?: string
@@ -64,6 +72,7 @@ export interface TextConfig {
 
 export interface ImageConfig extends NetworkResource {
   type: ConfigType.Image
+  creationMethod?: ElementCreationMethod
   width?: number
   height?: number
 }
@@ -109,6 +118,7 @@ const configDefaults: ConfigDefaultsMap = {
   [ConfigType.Script](config: ScriptConfig) {
     return {
       ...defaultNetworkResource,
+      creationMethod: ElementCreationMethod.HTML,
       executionDuration: 0,
       inclusionType: ScriptInclusionType.External,
       ...config,
@@ -117,6 +127,7 @@ const configDefaults: ConfigDefaultsMap = {
   [ConfigType.Stylesheet](config: StyleConfig) {
     return {
       ...defaultNetworkResource,
+      creationMethod: ElementCreationMethod.HTML,
       inclusionType: StylesheetInclusionType.External,
       backgroundColor: '',
       textColor: '',
@@ -126,6 +137,7 @@ const configDefaults: ConfigDefaultsMap = {
   [ConfigType.Image](config: ImageConfig) {
     return {
       ...defaultNetworkResource,
+      creationMethod: ElementCreationMethod.HTML,
       width: 100,
       height: 100,
       ...config,
@@ -136,6 +148,7 @@ const configDefaults: ConfigDefaultsMap = {
       id: '',
       sizeInBytes: 0,
       textContent: 'Hello, Cuzillion!',
+      creationMethod: ElementCreationMethod.HTML,
       ...config,
     }
   },
@@ -156,15 +169,15 @@ export function withDefaults<T extends CuzillionConfig>(config: T): Required<T> 
 export function hasNonDefaultTypeSettings(config: CuzillionConfig): boolean {
   const typeDefaults = withDefaults<CuzillionConfig>({type: config.type})
   const networkKeys = Object.keys(defaultNetworkResource)
-  const typeKeys_ = Object.keys(typeDefaults).filter((key) => !networkKeys.includes(key))
+  const typeKeys_ = Object.keys(typeDefaults).filter(key => !networkKeys.includes(key))
   const typeKeys = typeKeys_ as Array<keyof CuzillionConfig>
-  return typeKeys.some((key) => !isEqual(typeDefaults[key], config[key]))
+  return typeKeys.some(key => !isEqual(typeDefaults[key], config[key]))
 }
 
 export function hasNonDefaultNetworkSettings(config: CuzillionConfig): boolean {
   if (!isNetworkResource(config)) return false
   const networkKeys = Object.keys(defaultNetworkResource) as Array<keyof NetworkResource>
-  return networkKeys.some((key) => !isEqual(defaultNetworkResource[key], config[key]))
+  return networkKeys.some(key => !isEqual(defaultNetworkResource[key], config[key]))
 }
 
 export function walkConfig(config: CuzillionConfig, processFn: (c: CuzillionConfig) => void): void {
@@ -172,8 +185,8 @@ export function walkConfig(config: CuzillionConfig, processFn: (c: CuzillionConf
 
   switch (config.type) {
     case ConfigType.Page:
-      if (config.body) config.body.forEach((child) => walkConfig(child, processFn))
-      if (config.head) config.head.forEach((child) => walkConfig(child, processFn))
+      if (config.body) config.body.forEach(child => walkConfig(child, processFn))
+      if (config.head) config.head.forEach(child => walkConfig(child, processFn))
       break
   }
 }

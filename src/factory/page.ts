@@ -10,6 +10,7 @@ import {
   withDefaults,
   walkConfig,
   ImageConfig,
+  ElementCreationMethod,
 } from '../types'
 import cloneDeep from 'lodash/cloneDeep'
 
@@ -69,19 +70,28 @@ function createHtmlChildren(children: PageConfig['body'], factory: IFactory): st
   if (!children) return html
 
   for (const child of children) {
+    let childHtml = ''
     switch (child.type) {
       case ConfigType.Script:
-        html += createScriptTag(child, factory)
+        childHtml += createScriptTag(child, factory)
         break
       case ConfigType.Stylesheet:
-        html += createStylesheetTag(child, factory)
+        childHtml += createStylesheetTag(child, factory)
         break
       case ConfigType.Image:
-        html += createImageTag(child, factory)
+        childHtml += createImageTag(child, factory)
         break
       case ConfigType.Text:
-        html += `<p>${factory.create(child).body}</p>`
+        childHtml += `<p>${factory.create(child).body}</p>`
         break
+    }
+
+    if (child.creationMethod === ElementCreationMethod.DocumentWrite) {
+      html += `<script>document.write(\`${childHtml
+        .replace(/\\/g, '\\\\')
+        .replace(/`/g, '\\`')}\`)</script>`
+    } else {
+      html += childHtml
     }
   }
 
