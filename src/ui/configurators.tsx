@@ -15,6 +15,7 @@ import {
   isNetworkResource,
   hasNonDefaultTypeSettings,
   hasNonDefaultNetworkSettings,
+  ElementCreationMethod,
 } from '../types'
 import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
@@ -198,7 +199,7 @@ const ConfiguratorOption = (props: {
       <div className="w-full text-xs text-gray-500 mb-1 mr-4 border-b border-blue-800">
         {props.label}
       </div>
-      <div className="w-full flex">{props.children}</div>
+      <div className="w-full flex truncate">{props.children}</div>
     </label>
   )
 }
@@ -235,6 +236,18 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
           ms
         </div>
       </ConfiguratorOption>
+      <ConfiguratorOption label="Element Creation" lgTargetSize="1/4">
+        <RadioButtonGroup
+          size="xs"
+          color="teal"
+          value={config.creationMethod}
+          options={[
+            {label: 'HTML', value: ElementCreationMethod.HTML},
+            {label: 'document.write', value: ElementCreationMethod.DocumentWrite},
+          ]}
+          setValue={creationMethod => clickHandler({creationMethod}, props)()}
+        />
+      </ConfiguratorOption>
     </Configurator>
   )
 }
@@ -254,6 +267,18 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
             {label: 'Inline', value: StylesheetInclusionType.Inline},
           ]}
           setValue={inclusionType => clickHandler({inclusionType}, props)()}
+        />
+      </ConfiguratorOption>
+      <ConfiguratorOption label="Element Creation" lgTargetSize="1/4">
+        <RadioButtonGroup
+          size="xs"
+          color="teal"
+          value={config.creationMethod}
+          options={[
+            {label: 'HTML', value: ElementCreationMethod.HTML},
+            {label: 'document.write', value: ElementCreationMethod.DocumentWrite},
+          ]}
+          setValue={creationMethod => clickHandler({creationMethod}, props)()}
         />
       </ConfiguratorOption>
     </Configurator>
@@ -279,6 +304,18 @@ const ImageConfigurator = (props: ConfigProps<ImageConfig>) => {
           onChange={(e: any) => clickHandler({height: Number(e.target.value)}, props)()}
         />
       </ConfiguratorOption>
+      <ConfiguratorOption label="Element Creation" lgTargetSize="1/4">
+        <RadioButtonGroup
+          size="xs"
+          color="teal"
+          value={config.creationMethod}
+          options={[
+            {label: 'HTML', value: ElementCreationMethod.HTML},
+            {label: 'document.write', value: ElementCreationMethod.DocumentWrite},
+          ]}
+          setValue={creationMethod => clickHandler({creationMethod}, props)()}
+        />
+      </ConfiguratorOption>
     </Configurator>
   )
 }
@@ -293,6 +330,18 @@ const TextConfigurator = (props: ConfigProps<TextConfig>) => {
           type="text"
           value={config.textContent}
           onChange={(e: any) => clickHandler({textContent: e.target.value}, props)()}
+        />
+      </ConfiguratorOption>
+      <ConfiguratorOption label="Element Creation" lgTargetSize="1/4">
+        <RadioButtonGroup
+          size="xs"
+          color="teal"
+          value={config.creationMethod}
+          options={[
+            {label: 'HTML', value: ElementCreationMethod.HTML},
+            {label: 'document.write', value: ElementCreationMethod.DocumentWrite},
+          ]}
+          setValue={creationMethod => clickHandler({creationMethod}, props)()}
         />
       </ConfiguratorOption>
     </Configurator>

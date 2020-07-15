@@ -83,7 +83,7 @@ describe('Page', () => {
         };
             stall(50);
             console.log('script ID 4 done');
-          </script>\`)</script><script>document.write(\`<style>html, body { height: 100vh; margin: 0; box-sizing: border-box; }
+          <\` + \`/script>\`)</script><script>document.write(\`<style>html, body { height: 100vh; margin: 0; box-sizing: border-box; }
         body { padding: 10px; }</style>\`)</script>
           </head>
           <body>

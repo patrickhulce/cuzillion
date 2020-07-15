@@ -87,9 +87,12 @@ function createHtmlChildren(children: PageConfig['body'], factory: IFactory): st
     }
 
     if (child.creationMethod === ElementCreationMethod.DocumentWrite) {
-      html += `<script>document.write(\`${childHtml
-        .replace(/\\/g, '\\\\')
-        .replace(/`/g, '\\`')}\`)</script>`
+      html += `<script>document.write(\`${
+        childHtml
+          .replace(/\\/g, '\\\\') // double-escapes backslashes
+          .replace(/`/g, '\\`') // escapes `
+          .replace(/<\/script>/g, '<` + `/script>') // replaces </script>
+      }\`)</script>`
     } else {
       html += childHtml
     }
@@ -100,7 +103,7 @@ function createHtmlChildren(children: PageConfig['body'], factory: IFactory): st
 
 function initializeIds(config: PageConfig): void {
   const state = {count: 1}
-  walkConfig(config, (config) => {
+  walkConfig(config, config => {
     if (!config.id) config.id = `${state.count++}`
   })
 }
