@@ -181,7 +181,11 @@ const Configurator = (
         const updatedParentArray = parentArray.filter(item => item.id !== props.config.id)
         const updatedTargetParentArray =
           parentArray === targetParentArray ? updatedParentArray : targetParentArray.slice()
-        const indexOfTargetConfig = updatedTargetParentArray.indexOf(closestConfig)
+        const indexOfTargetConfig = updatedTargetParentArray.findIndex(
+          item => item.id === closestConfig.id,
+        )
+        if (indexOfTargetConfig === -1) return
+
         updatedTargetParentArray.splice(
           isBeforeClosest ? indexOfTargetConfig : indexOfTargetConfig + 1,
           0,
