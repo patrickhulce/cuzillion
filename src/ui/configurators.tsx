@@ -21,6 +21,8 @@ import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import set from 'lodash/set'
+import isEqual from 'lodash/isEqual'
+import minBy from 'lodash/minBy'
 import {TrashIcon, RefreshIcon, NetworkIcon, SettingsIcon} from './components/icons'
 import {useState} from 'preact/hooks'
 import clsx from 'clsx'
@@ -143,12 +145,55 @@ const Configurator = (
   props: ConfigProps<CuzillionConfig> & {name: string; children: JSX.Element | JSX.Element[]},
 ) => {
   const config = withDefaults(props.config)
-  const hasSettings = hasNonDefaultTypeSettings(config)
-  const hasNetworkSettings = hasNonDefaultNetworkSettings(config)
+  const hasSettings = hasNonDefaultTypeSettings({...config, id: ''})
+  const hasNetworkSettings = hasNonDefaultNetworkSettings({...config, id: ''})
   const [isVisible, setIsVisible] = useState(hasSettings)
   const [isNetVisible, setIsNetVisible] = useState(hasNetworkSettings)
   return (
-    <div className="rounded bg-blue-900 p-2 mb-2">
+    <div
+      className="rounded bg-blue-900 p-2 mb-2 cursor-move"
+      draggable={props.configPath.length === 2} // only allow first-level children to be draggable
+      data-configpath={props.configPath.join(',')}
+      onDrag={e => {
+        if (props.config.type === ConfigType.Page) return
+
+        const allDraggables: HTMLElement[] = Array.from(document.querySelectorAll('div[draggable]'))
+        const positions = allDraggables.map(el => {
+          const rect = el.getBoundingClientRect()
+          return {el, position: (rect.top + rect.bottom) / 2, rect}
+        })
+        const closest = minBy(positions, ({position}) => Math.abs(position - e.clientY))
+        if (!closest) return
+
+        const isBeforeClosest = closest.position > e.clientY
+        const closestConfigPath = (closest.el.dataset.configpath || '').split(',')
+        if (!closestConfigPath.length) return
+        if (isEqual(props.configPath, closestConfigPath)) return
+
+        const closestConfig = get(props.rootConfig, closestConfigPath)
+        const parentArray: Required<PageConfig>['body'] = get(props.rootConfig, [
+          props.configPath[0],
+        ])
+        const targetParentArray: Required<PageConfig>['body'] = get(props.rootConfig, [
+          closestConfigPath[0],
+        ])
+
+        const updatedParentArray = parentArray.filter(item => item.id !== props.config.id)
+        const updatedTargetParentArray =
+          parentArray === targetParentArray ? updatedParentArray : targetParentArray.slice()
+        const indexOfTargetConfig = updatedTargetParentArray.indexOf(closestConfig)
+        updatedTargetParentArray.splice(
+          isBeforeClosest ? indexOfTargetConfig : indexOfTargetConfig + 1,
+          0,
+          props.config,
+        )
+
+        if (isEqual(parentArray, updatedParentArray)) return
+        const rootConfig = {...props.rootConfig}
+        set(rootConfig, [props.configPath[0]], updatedParentArray)
+        set(rootConfig, [closestConfigPath[0]], updatedTargetParentArray)
+        props.setRootConfig(rootConfig)
+      }}>
       <div className="w-full flex items-center">
         <div className="flex-grow">{props.name}</div>
         <div className="w-auto h-6 flex items-center">
@@ -376,11 +421,14 @@ const PageSubtarget = (
     })
 
   return (
-    <div className="p-2 bg-blue-800 rounded mb-2">
+    <div
+      className="p-2 bg-blue-800 rounded mb-2"
+      onDragOver={e => e.preventDefault()} // allow other elements to be dropped onto this element
+    >
       <div className="font-mono mb-2">{props.label}</div>
       {props.items.map((item, idx) => (
         <ChildConfigurator
-          key={`${item.type}-${item.id}-${idx}`}
+          key={`${item.type}-${item.id}`}
           {...props}
           config={item}
           configPath={[props.label, idx.toString()]}

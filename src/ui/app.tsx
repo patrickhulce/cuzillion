@@ -1,6 +1,6 @@
 import * as preact from 'preact'
 import {useState, useEffect} from 'preact/hooks'
-import {ConfigType, PageConfig, EMPTY_PAGE} from '../types'
+import {ConfigType, PageConfig, EMPTY_PAGE, initializeIds} from '../types'
 import {serializeConfig, deserializeConfig} from '../serialization'
 import {PageConfigurator} from './configurators'
 
@@ -18,6 +18,7 @@ const DEFAULT_STATE = getDefaultPageConfig()
 
 export const App = () => {
   const [config, setConfig] = useState<PageConfig>(DEFAULT_STATE)
+  initializeIds(config)
   const iframeUrl = new URL(
     `/api/page.html?config=${serializeConfig(config)}`,
     window.location.origin,

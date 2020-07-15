@@ -6,7 +6,7 @@ import isEqual from 'lodash/isEqual'
 const log = debug('cuzillion:serialization')
 
 function recursizelyTrimDefaults(config: CuzillionConfig): void {
-  walkConfig(config, (config) => {
+  walkConfig(config, config => {
     const configWithDefaults = withDefaults({type: config.type} as CuzillionConfig)
     for (const key_ of Object.keys(config)) {
       const key = key_ as keyof CuzillionConfig
@@ -17,7 +17,7 @@ function recursizelyTrimDefaults(config: CuzillionConfig): void {
 }
 
 function recursizelyHydrateDefaults(config: CuzillionConfig): void {
-  walkConfig(config, (config) => {
+  walkConfig(config, config => {
     Object.assign(config, withDefaults(config))
   })
 }

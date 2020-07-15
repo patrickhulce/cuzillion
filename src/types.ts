@@ -190,3 +190,10 @@ export function walkConfig(config: CuzillionConfig, processFn: (c: CuzillionConf
       break
   }
 }
+
+export function initializeIds(config: CuzillionConfig): void {
+  const state = {count: 1}
+  walkConfig(config, config => {
+    if (!config.id) config.id = `${state.count++}`
+  })
+}

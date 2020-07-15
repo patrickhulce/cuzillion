@@ -8,9 +8,9 @@ import {
   ScriptConfig,
   StyleConfig,
   withDefaults,
-  walkConfig,
   ImageConfig,
   ElementCreationMethod,
+  initializeIds,
 } from '../types'
 import cloneDeep from 'lodash/cloneDeep'
 
@@ -99,13 +99,6 @@ function createHtmlChildren(children: PageConfig['body'], factory: IFactory): st
   }
 
   return html
-}
-
-function initializeIds(config: PageConfig): void {
-  const state = {count: 1}
-  walkConfig(config, config => {
-    if (!config.id) config.id = `${state.count++}`
-  })
 }
 
 export function createPage(
