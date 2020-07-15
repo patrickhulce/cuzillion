@@ -131,8 +131,7 @@ const ConfiguratorButton = (props: {
         selected={props.toggle && props.toggle[0]}
         size="xs"
         onClick={onClick}
-        color={props.flagged ? 'teal' : 'gray'}
-      >
+        color={props.flagged ? 'teal' : 'gray'}>
         {props.icon({className: 'h-4 w-4'})}
       </Button>
     </div>
@@ -220,7 +219,7 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
             {label: 'Async', value: ScriptInclusionType.ExternalAsync},
             {label: 'Inline', value: ScriptInclusionType.Inline},
           ]}
-          setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
+          setValue={inclusionType => clickHandler({inclusionType}, props)()}
         />
       </ConfiguratorOption>
       <ConfiguratorOption label="Execution Duration" lgTargetSize="1/4">
@@ -254,7 +253,7 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
             {label: 'Async', value: StylesheetInclusionType.ExternalAsync},
             {label: 'Inline', value: StylesheetInclusionType.Inline},
           ]}
-          setValue={(inclusionType) => clickHandler({inclusionType}, props)()}
+          setValue={inclusionType => clickHandler({inclusionType}, props)()}
         />
       </ConfiguratorOption>
     </Configurator>

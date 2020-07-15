@@ -81,8 +81,7 @@ export function RadioButtonGroup<T>(props: {
             size={props.size}
             color={props.color}
             selected={props.value === option.value}
-            onClick={() => props.setValue(option.value)}
-          >
+            onClick={() => props.setValue(option.value)}>
             {option.label}
           </Button>
         )

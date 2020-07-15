@@ -35,8 +35,7 @@ export const App = () => {
             <div className="w-10/12">
               <a
                 className="text-gray-100 text-base pl-4 xl:text-xl no-underline hover:no-underline font-bold"
-                href="#"
-              >
+                href="#">
                 Cuzillion
               </a>
               <span className="text-gray-400 text-xs italic ml-2 lg:inline hidden">
@@ -54,14 +53,14 @@ export const App = () => {
                 className="flex-grow mr-4 rounded text-gray-800 px-1"
                 type="text"
                 value={window.location.href}
-                onClick={(e) => {
+                onClick={e => {
                   if (!(e.target instanceof HTMLInputElement)) return
                   e.target.select()
                   e.target.value = window.location.href
                   if (!navigator.clipboard) return
                   navigator.clipboard.writeText(window.location.href)
                 }}
-                onKeyDown={(e) => e.preventDefault()}
+                onKeyDown={e => e.preventDefault()}
               />
             </label>
             <label className="flex flex-wrap w-1/2">
@@ -70,13 +69,13 @@ export const App = () => {
                 className="flex-grow mr-4 rounded text-gray-800 px-1"
                 type="text"
                 value={iframeUrl}
-                onClick={(e) => {
+                onClick={e => {
                   if (!(e.target instanceof HTMLInputElement)) return
                   e.target.select()
                   if (!navigator.clipboard) return
                   navigator.clipboard.writeText(iframeUrl)
                 }}
-                onKeyDown={(e) => e.preventDefault()}
+                onKeyDown={e => e.preventDefault()}
               />
             </label>
           </div>
@@ -87,8 +86,7 @@ export const App = () => {
         <iframe
           title="Configured Cuzillion Page"
           className="w-full h-screen"
-          src={iframeUrl}
-        ></iframe>
+          src={iframeUrl}></iframe>
       </div>
     </div>
   )

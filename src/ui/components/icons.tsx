@@ -13,8 +13,7 @@ const SvgIcon = (props: SvgProps & {children: JSX.Element | JSX.Element[]}) => {
         'w-6': !props.className?.match(/\bw-\d/),
       })}
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-    >
+      viewBox="0 0 24 24">
       {props.children}
     </svg>
   )
