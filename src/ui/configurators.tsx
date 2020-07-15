@@ -155,7 +155,8 @@ const Configurator = (
       draggable={props.configPath.length === 2} // only allow first-level children to be draggable
       data-configpath={props.configPath.join(',')}
       onDrag={e => {
-        if (props.config.type === ConfigType.Page) return
+        if (props.config.type === ConfigType.Page || props.config.type === ConfigType.ScriptAction)
+          return
 
         const allDraggables: HTMLElement[] = Array.from(document.querySelectorAll('div[draggable]'))
         const positions = allDraggables.map(el => {

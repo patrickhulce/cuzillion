@@ -18,6 +18,7 @@ export interface NetworkResourceResponse {
 export enum ConfigType {
   Page = 'p',
   Script = 'js',
+  ScriptAction = 'jsa',
   Stylesheet = 'css',
   Image = 'img',
   Text = 'txt',
@@ -28,6 +29,17 @@ export enum ScriptInclusionType {
   ExternalDefer = 'defer',
   ExternalAsync = 'async',
   Inline = 'inline',
+}
+
+export enum ScriptActionType {
+  Stall = 'stall',
+  XHR = 'xhr',
+  SyncXHR = 'syncxhr',
+  Fetch = 'fetch',
+  SetTimeout = 'timeout',
+  LoadListener = 'load',
+  DCLListener = 'dcl',
+  AddElement = 'element',
 }
 
 export enum StylesheetInclusionType {
@@ -47,11 +59,22 @@ export interface PageConfig extends NetworkResource {
   body?: Array<ScriptConfig | StyleConfig | ImageConfig | TextConfig>
 }
 
+export interface ScriptActionConfig {
+  type: ConfigType.ScriptAction
+  actionType?: ScriptActionType
+  id?: string
+  executionDuration?: number
+  timeoutDelay?: number
+  dependent?: NetworkResourceConfig
+  onComplete?: Array<ScriptActionConfig>
+}
+
 export interface ScriptConfig extends NetworkResource {
   type: ConfigType.Script
   creationMethod?: ElementCreationMethod
   executionDuration?: number
   inclusionType?: ScriptInclusionType
+  actions?: Array<ScriptActionConfig>
 }
 
 export interface StyleConfig extends NetworkResource {
@@ -62,11 +85,9 @@ export interface StyleConfig extends NetworkResource {
   inclusionType?: StylesheetInclusionType
 }
 
-export interface TextConfig {
+export interface TextConfig extends NetworkResource {
   type: ConfigType.Text
   creationMethod?: ElementCreationMethod
-  id?: string
-  sizeInBytes?: number
   textContent?: string
 }
 
@@ -77,15 +98,21 @@ export interface ImageConfig extends NetworkResource {
   height?: number
 }
 
-export type NetworkResourceConfig = PageConfig | ScriptConfig | StyleConfig | ImageConfig
+export type NetworkResourceConfig =
+  | PageConfig
+  | ScriptConfig
+  | StyleConfig
+  | ImageConfig
+  | TextConfig
+export type NetworkResourceConfigType = NetworkResourceConfig['type']
 
-export type CuzillionConfig = NetworkResourceConfig | TextConfig
+export type CuzillionConfig = NetworkResourceConfig | ScriptActionConfig
 
 export interface IFactory {
-  getLinkTo(config: CuzillionConfig): string
-  create(config: CuzillionConfig): NetworkResourceResponse
+  getLinkTo(config: NetworkResourceConfig): string
+  create(config: NetworkResourceConfig): NetworkResourceResponse
   injectBytes(
-    config: CuzillionConfig,
+    config: NetworkResourceConfig,
     body: Buffer | string | undefined,
   ): Buffer | string | undefined
 }
@@ -93,6 +120,7 @@ export interface IFactory {
 interface ConfigDefaultsMap {
   [ConfigType.Page](page: PageConfig): Required<PageConfig>
   [ConfigType.Script](page: ScriptConfig): Required<ScriptConfig>
+  [ConfigType.ScriptAction](page: ScriptActionConfig): Required<ScriptActionConfig>
   [ConfigType.Stylesheet](page: StyleConfig): Required<StyleConfig>
   [ConfigType.Image](page: ImageConfig): Required<ImageConfig>
   [ConfigType.Text](page: TextConfig): Required<TextConfig>
@@ -121,6 +149,18 @@ const configDefaults: ConfigDefaultsMap = {
       creationMethod: ElementCreationMethod.HTML,
       executionDuration: 0,
       inclusionType: ScriptInclusionType.External,
+      actions: [],
+      ...config,
+    }
+  },
+  [ConfigType.ScriptAction](config: ScriptActionConfig) {
+    return {
+      ...defaultNetworkResource,
+      actionType: ScriptActionType.Stall,
+      onComplete: [],
+      executionDuration: 0,
+      timeoutDelay: 2000,
+      dependent: {type: ConfigType.Text},
       ...config,
     }
   },
@@ -145,8 +185,7 @@ const configDefaults: ConfigDefaultsMap = {
   },
   [ConfigType.Text](config: TextConfig) {
     return {
-      id: '',
-      sizeInBytes: 0,
+      ...defaultNetworkResource,
       textContent: 'Hello, Cuzillion!',
       creationMethod: ElementCreationMethod.HTML,
       ...config,
@@ -187,6 +226,13 @@ export function walkConfig(config: CuzillionConfig, processFn: (c: CuzillionConf
     case ConfigType.Page:
       if (config.body) config.body.forEach(child => walkConfig(child, processFn))
       if (config.head) config.head.forEach(child => walkConfig(child, processFn))
+      break
+    case ConfigType.Script:
+      if (config.actions) config.actions.forEach(child => walkConfig(child, processFn))
+      break
+    case ConfigType.ScriptAction:
+      if (config.dependent) walkConfig(config.dependent, processFn)
+      if (config.onComplete) config.onComplete.forEach(child => walkConfig(child, processFn))
       break
   }
 }

@@ -1,4 +1,10 @@
-import {ConfigType, CuzillionConfig, NetworkResourceResponse, IFactory} from '../types'
+import {
+  ConfigType,
+  NetworkResourceResponse,
+  IFactory,
+  NetworkResourceConfigType,
+  NetworkResourceConfig,
+} from '../types'
 import {createPage, injectPageBytes} from './page'
 import {injectScriptBytes, createScript} from './script'
 import {serializeConfig} from '../serialization'
@@ -11,23 +17,23 @@ const DEFAULT_URL_MAP = {
   [ConfigType.Script]: '/api/script.js',
   [ConfigType.Stylesheet]: '/api/style.css',
   [ConfigType.Image]: '/api/image.jpg',
-  [ConfigType.Text]: '/not-supported',
+  [ConfigType.Text]: '/api/text.txt',
 }
 
 export class Factory implements IFactory {
-  private _urlMap: Record<ConfigType, string>
+  private _urlMap: Record<NetworkResourceConfigType, string>
 
-  public constructor(urlMap: Record<ConfigType, string>) {
+  public constructor(urlMap: Record<NetworkResourceConfigType, string>) {
     this._urlMap = urlMap
   }
 
-  public getLinkTo(config: CuzillionConfig): string {
+  public getLinkTo(config: NetworkResourceConfig): string {
     const url = new URL(this._urlMap[config.type], 'http://localhost')
     url.searchParams.set('config', serializeConfig(config))
     return `${url.pathname}${url.search}`
   }
 
-  public create(config: CuzillionConfig): NetworkResourceResponse {
+  public create(config: NetworkResourceConfig): NetworkResourceResponse {
     switch (config.type) {
       case ConfigType.Page:
         return {...createPage(config, this), link: this.getLinkTo(config)}
@@ -43,7 +49,7 @@ export class Factory implements IFactory {
   }
 
   public injectBytes(
-    config: CuzillionConfig,
+    config: NetworkResourceConfig,
     body: Buffer | string | undefined,
   ): Buffer | string | undefined {
     if (body === undefined || !config.sizeInBytes) return body

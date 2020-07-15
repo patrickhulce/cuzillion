@@ -65,6 +65,7 @@ export function createServer(options: {
   app.use('/ui/', express.static(staticDir))
   app.use('/api/page.html', respondWithFactory(factory.create, factory.injectBytes))
   app.use('/api/script.js', respondWithFactory(factory.create, factory.injectBytes))
+  app.use('/api/text.txt', respondWithFactory(factory.create, factory.injectBytes))
   app.use('/api/style.css', respondWithFactory(factory.create, factory.injectBytes))
   app.use('/api/image.jpg', respondWithFactory(factory.create, factory.injectBytes))
 
@@ -77,7 +78,7 @@ export function createServer(options: {
 
       const port = address.port
       logFn(`Server listening on http://localhost:${port}/\n`)
-      resolve({port, close: () => new Promise((r) => server.close(() => r()))})
+      resolve({port, close: () => new Promise(r => server.close(() => r()))})
     })
   })
 }
