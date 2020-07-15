@@ -39,7 +39,6 @@ function createActionBody(
       return `fetch('${fetchLink}').then(() => { ${onCompleteBody} });`
     }
     case ScriptActionType.AddElement: {
-      if (dependent.type === ConfigType.Page) throw new Error('Page cannot be child of script')
       const page = factory.create({type: ConfigType.Page, body: [dependent]})
       const bodyHtmlMatch = page.body.toString().match(/<body>([\s\S]+)<\/body>\s*<\/html>$/)
       if (!bodyHtmlMatch) throw new Error('Failed to extract HTML to add via script')

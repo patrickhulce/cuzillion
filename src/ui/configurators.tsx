@@ -19,7 +19,7 @@ import {
   ScriptActionConfig,
   ScriptActionType,
 } from '../types'
-import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
+import {ButtonGroup, Button, RadioButtonGroup, SelectButton} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import set from 'lodash/set'
@@ -87,6 +87,7 @@ function dragHandler(
     if (isEqual(props.configPath, closestConfigPath)) return
 
     const closestConfig = get(props.rootConfig, closestConfigPath)
+    if (!closestConfig) return
     const parentArray: Required<PageConfig>['body'] = get(props.rootConfig, [props.configPath[0]])
     const targetParentArray: Required<PageConfig>['body'] = get(props.rootConfig, [
       closestConfigPath[0],
@@ -364,6 +365,7 @@ const ScriptActionLabels: Record<ScriptActionType, string> = {
 const ScriptActionListConfigurator = (
   props: {label: string; actionsList: Array<ScriptActionConfig>} & Omit<ConfigProps, 'config'>,
 ) => {
+  const [actionTypeToAdd, setActionTypeToAdd] = useState(ScriptActionType.Stall)
   return (
     <ConfiguratorOption label={props.label} lgTargetSize="full">
       <div className="w-full">
@@ -376,22 +378,28 @@ const ScriptActionListConfigurator = (
             configPath={[...props.configPath, `${idx}`]}
           />
         ))}
-        <ButtonGroup className="py-2 text-xs">
-          {Object.keys(ScriptActionLabels).map(actionType_ => {
-            const actionType = actionType_ as ScriptActionType
-            return (
-              <Button
-                size="xs"
-                title={`Add a ${ScriptActionLabels[actionType]} action`}
-                onClick={clickHandler(
-                  [...props.actionsList, {type: ConfigType.ScriptAction, actionType}],
-                  props,
-                )}>
-                {ScriptActionLabels[actionType]}
-              </Button>
-            )
-          })}
-        </ButtonGroup>
+        <div className="flex flex-row">
+          <SelectButton
+            size="xs"
+            value={actionTypeToAdd}
+            options={Object.keys(ScriptActionLabels).map(actionType_ => {
+              const actionType = actionType_ as ScriptActionType
+              return {label: ScriptActionLabels[actionType], value: actionType}
+            })}
+            setValue={setActionTypeToAdd}
+          />
+          <div className="w-1"></div>
+          <Button
+            size="xs"
+            solo
+            title={`Add an action action`}
+            onClick={clickHandler(
+              [...props.actionsList, {type: ConfigType.ScriptAction, actionType: actionTypeToAdd}],
+              props,
+            )}>
+            Add
+          </Button>
+        </div>
       </div>
     </ConfiguratorOption>
   )

@@ -34,9 +34,9 @@ const CLASSES_FOR_SIZE = {
   xs: 'text-xs px-1',
 }
 
-export const Button = (props: ButtonProps) => {
+function getButtonClasses(props: Partial<ButtonProps>): string {
   const {color = 'gray', size = 'sm'} = props
-  const className = clsx('font-bold', props.className, {
+  return clsx('font-bold', props.className, {
     [CLASSES_FOR_COLOR.blue]: color === 'blue',
     [CLASSES_FOR_COLOR.teal]: color === 'teal',
     [CLASSES_FOR_COLOR.gray]: color === 'gray',
@@ -53,6 +53,10 @@ export const Button = (props: ButtonProps) => {
     'shadow-outline': props.flagged,
     'first:rounded-l last:rounded-r': !props.solo,
   })
+}
+
+export const Button = (props: ButtonProps) => {
+  const className = getButtonClasses(props)
 
   return (
     <button title={props.title} className={className} onClick={props.onClick}>
@@ -87,5 +91,43 @@ export function RadioButtonGroup<T>(props: {
         )
       })}
     </ButtonGroup>
+  )
+}
+
+export function SelectButton<T>(props: {
+  options: Array<{label: string; value: T}>
+  value: T
+  setValue: (next: T) => void
+  size?: ButtonProps['size']
+  color?: ButtonProps['color']
+}): JSX.Element {
+  const classes = getButtonClasses({size: props.size, color: props.color, solo: true})
+  return (
+    <div className="inline-block relative">
+      <select
+        onChange={(evt: any) => props.setValue(props.options[Number(evt.target!.value)].value)}
+        className={clsx(
+          classes,
+          'block appearance-none w-full pr-4 focus:outline-none focus:shadow-outline',
+        )}>
+        {props.options.map((option, idx) => {
+          return <option value={idx}>{option.label}</option>
+        })}
+      </select>
+      <div
+        className={clsx(
+          'pointer-events-none absolute inset-y-0 right-0 flex items-center text-gray-700',
+          {
+            'pr-1': props.size !== 'xs',
+          },
+        )}>
+        <svg
+          className="fill-current h-4 w-4"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20">
+          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+        </svg>
+      </div>
+    </div>
   )
 }
