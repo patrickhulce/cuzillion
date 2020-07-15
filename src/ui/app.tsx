@@ -1,4 +1,4 @@
-import {h} from 'preact'
+import * as preact from 'preact'
 import {useState, useEffect} from 'preact/hooks'
 import {ConfigType, PageConfig, EMPTY_PAGE} from '../types'
 import {serializeConfig, deserializeConfig} from '../serialization'
@@ -7,7 +7,7 @@ import {PageConfigurator} from './configurators'
 function getDefaultPageConfig(): PageConfig {
   const hashParams = new URLSearchParams(location.hash.replace('#', '?'))
   if (hashParams.has('config')) {
-    const config = deserializeConfig(hashParams.get('config'))
+    const config = deserializeConfig(hashParams.get('config') || '')
     if (config && config.type === ConfigType.Page) return config
   }
 

@@ -15,10 +15,10 @@
     "preserveWatchOutput": true,
 
     "jsx": "react",
-    "jsxFactory": "h",
+    "jsxFactory": "preact.h",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "diagnostics": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

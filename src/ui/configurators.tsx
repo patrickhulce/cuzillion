@@ -1,4 +1,4 @@
-import {h} from 'preact'
+import * as preact from 'preact'
 import {
   PageConfig,
   ConfigType,
@@ -32,7 +32,7 @@ interface ConfigProps<T = PageConfig> {
   configPath: string[]
 }
 
-type PageChildConfig = PageConfig['body'][0]
+type PageChildConfig = Required<PageConfig>['body'][0]
 
 function clickHandler<T = PageConfig>(
   config: Partial<T> | null,
@@ -67,7 +67,7 @@ const NetworkResourceConfiguratorSection = (
             className="text-xs w-10 px-1 rounded text-black mr-2"
             type="text"
             value={props.config.fetchDelay}
-            onChange={(e) => clickHandler({fetchDelay: Number(e.target.value)}, props)()}
+            onChange={(e: any) => clickHandler({fetchDelay: Number(e.target.value)}, props)()}
           />
           ms
         </div>
@@ -78,7 +78,7 @@ const NetworkResourceConfiguratorSection = (
             className="text-xs w-10 px-1 rounded text-black mr-2"
             type="text"
             value={props.config.redirectCount}
-            onChange={(e) => clickHandler({redirectCount: Number(e.target.value)}, props)()}
+            onChange={(e: any) => clickHandler({redirectCount: Number(e.target.value)}, props)()}
           />
         </div>
       </ConfiguratorOption>
@@ -88,7 +88,7 @@ const NetworkResourceConfiguratorSection = (
             className="text-xs w-10 px-1 rounded text-black mr-2"
             type="text"
             value={props.config.statusCode}
-            onChange={(e) => clickHandler({statusCode: Number(e.target.value)}, props)()}
+            onChange={(e: any) => clickHandler({statusCode: Number(e.target.value)}, props)()}
           />
         </div>
       </ConfiguratorOption>
@@ -98,7 +98,9 @@ const NetworkResourceConfiguratorSection = (
             className="text-xs w-10 px-1 rounded text-black mr-2"
             type="text"
             value={Math.ceil(props.config.sizeInBytes / 1024)}
-            onChange={(e) => clickHandler({sizeInBytes: Number(e.target.value) * 1024}, props)()}
+            onChange={(e: any) =>
+              clickHandler({sizeInBytes: Number(e.target.value) * 1024}, props)()
+            }
           />
           KiB
         </div>
@@ -116,7 +118,8 @@ const ConfiguratorButton = (props: {
   flagged?: boolean
 }) => {
   let onClick = props.onClick
-  if (!onClick && props.toggle) onClick = () => props.toggle[1](!props.toggle[0])
+  const toggle = props.toggle
+  if (!onClick && toggle) onClick = () => toggle[1](!toggle[0])
   if (!onClick) throw new Error('Must set either toggle or onClick')
 
   return (
@@ -226,7 +229,9 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
             className="text-xs w-10 px-1 rounded text-black mr-2"
             type="text"
             value={config.executionDuration}
-            onChange={(e) => clickHandler({executionDuration: Number(e.target.value)}, props)()}
+            onChange={(e: any) =>
+              clickHandler({executionDuration: Number(e.target.value)}, props)()
+            }
           />
           ms
         </div>
@@ -265,14 +270,14 @@ const ImageConfigurator = (props: ConfigProps<ImageConfig>) => {
           className="text-black text-xs rounded px-1 w-10"
           type="text"
           value={config.width}
-          onChange={(e) => clickHandler({width: Number(e.target.value)}, props)()}
+          onChange={(e: any) => clickHandler({width: Number(e.target.value)}, props)()}
         />
         <span className="text-xs mx-1">x</span>
         <input
           className="text-black text-xs rounded px-1 w-10"
           type="text"
           value={config.height}
-          onChange={(e) => clickHandler({height: Number(e.target.value)}, props)()}
+          onChange={(e: any) => clickHandler({height: Number(e.target.value)}, props)()}
         />
       </ConfiguratorOption>
     </Configurator>
@@ -288,7 +293,7 @@ const TextConfigurator = (props: ConfigProps<TextConfig>) => {
           className="w-full text-black rounded px-1"
           type="text"
           value={config.textContent}
-          onChange={(e) => clickHandler({textContent: e.target.value}, props)()}
+          onChange={(e: any) => clickHandler({textContent: e.target.value}, props)()}
         />
       </ConfiguratorOption>
     </Configurator>
@@ -344,12 +349,16 @@ const PageSubtarget = (
           <Button title="Add an image element" onClick={clickHandler(ConfigType.Image)}>
             Image
           </Button>
-        ) : null}
+        ) : (
+          <PreactFragment />
+        )}
         {props.label === 'body' ? (
           <Button title="Add a text element" onClick={clickHandler(ConfigType.Text)}>
             Text
           </Button>
-        ) : null}
+        ) : (
+          <PreactFragment />
+        )}
       </ButtonGroup>
     </div>
   )

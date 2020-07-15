@@ -1,3 +1,3 @@
-import {h, Fragment} from 'preact'
+import * as preact from 'preact'
 
-export const PreactFragment = Fragment as any
+export const PreactFragment = preact.Fragment as any
