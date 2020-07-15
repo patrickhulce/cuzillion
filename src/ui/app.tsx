@@ -18,6 +18,7 @@ const DEFAULT_STATE = getDefaultPageConfig()
 
 export const App = () => {
   const [config, setConfig] = useState<PageConfig>(DEFAULT_STATE)
+  ;(window as any).__CONFIG__ = config
   initializeIds(config)
   const iframeUrl = new URL(
     `/api/page.html?config=${serializeConfig(config)}`,
@@ -30,7 +31,7 @@ export const App = () => {
 
   return (
     <div className="flex flex-row h-screen bg-gray-900 text-white font-sans leading-normal tracking-normal flex-wrap">
-      <div className="w-full sm:w-1/2 h-screen flex flex-col">
+      <div className="w-full sm:w-1/2 h-screen flex flex-col overflow-auto">
         <nav id="header" className="bg-blue-900 w-full z-10 top-0 shadow">
           <div className="w-full container mx-auto flex flex-wrap items-center mt-0 pt-3 pb-3">
             <div className="w-10/12">

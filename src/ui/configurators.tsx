@@ -16,6 +16,8 @@ import {
   hasNonDefaultTypeSettings,
   hasNonDefaultNetworkSettings,
   ElementCreationMethod,
+  ScriptActionConfig,
+  ScriptActionType,
 } from '../types'
 import {ButtonGroup, Button, RadioButtonGroup} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
@@ -42,9 +44,10 @@ function clickHandler<T = PageConfig>(
   props: Omit<ConfigProps, 'config'>,
 ): () => void {
   return () => {
+    const parentPath = props.configPath.slice(0, props.configPath.length - 1)
     const cloned = cloneDeep(props.rootConfig)
     if (config === null) {
-      const parent = get(cloned, props.configPath.slice(0, props.configPath.length - 1))
+      const parent = get(cloned, parentPath)
       const childKey = props.configPath[props.configPath.length - 1]
       if (Array.isArray(parent)) {
         parent.splice(Number(childKey), 1)
@@ -52,11 +55,84 @@ function clickHandler<T = PageConfig>(
         delete parent[childKey]
       }
     } else {
-      set(cloned, props.configPath, {...get(cloned, props.configPath), ...config})
+      set(
+        cloned,
+        props.configPath,
+        Array.isArray(config) ? config : {...get(cloned, props.configPath), ...config},
+      )
     }
 
     props.setRootConfig(cloned)
   }
+}
+
+function dragHandler(
+  props: ConfigProps<CuzillionConfig>,
+): (evt: preact.JSX.TargetedDragEvent<HTMLDivElement>) => void {
+  return evt => {
+    if (props.config.type === ConfigType.Page || props.config.type === ConfigType.ScriptAction)
+      return
+
+    const allDraggables: HTMLElement[] = Array.from(document.querySelectorAll('div[draggable]'))
+    const positions = allDraggables.map(el => {
+      const rect = el.getBoundingClientRect()
+      return {el, position: (rect.top + rect.bottom) / 2, rect}
+    })
+    const closest = minBy(positions, ({position}) => Math.abs(position - evt.clientY))
+    if (!closest) return
+
+    const isBeforeClosest = closest.position > evt.clientY
+    const closestConfigPath = (closest.el.dataset.configpath || '').split(',')
+    if (!closestConfigPath.length) return
+    if (isEqual(props.configPath, closestConfigPath)) return
+
+    const closestConfig = get(props.rootConfig, closestConfigPath)
+    const parentArray: Required<PageConfig>['body'] = get(props.rootConfig, [props.configPath[0]])
+    const targetParentArray: Required<PageConfig>['body'] = get(props.rootConfig, [
+      closestConfigPath[0],
+    ])
+
+    const updatedParentArray = parentArray.filter(item => item.id !== props.config.id)
+    const updatedTargetParentArray =
+      parentArray === targetParentArray ? updatedParentArray : targetParentArray.slice()
+    const indexOfTargetConfig = updatedTargetParentArray.findIndex(
+      item => item.id === closestConfig.id,
+    )
+    if (indexOfTargetConfig === -1) return
+
+    updatedTargetParentArray.splice(
+      isBeforeClosest ? indexOfTargetConfig : indexOfTargetConfig + 1,
+      0,
+      props.config,
+    )
+
+    if (isEqual(parentArray, updatedParentArray)) return
+    const rootConfig = {...props.rootConfig}
+    set(rootConfig, [props.configPath[0]], updatedParentArray)
+    set(rootConfig, [closestConfigPath[0]], updatedTargetParentArray)
+    props.setRootConfig(rootConfig)
+  }
+}
+
+function getParentConfig(
+  rootConfig: PageConfig,
+  configPath: string[],
+): [CuzillionConfig, string[]] {
+  let targetPath = configPath.slice(0, configPath.length - 1)
+  while (targetPath.length && Array.isArray(get(rootConfig, targetPath))) targetPath.pop()
+  if (!targetPath.length) return [rootConfig, []]
+  return [get(rootConfig, targetPath), targetPath]
+}
+
+function getConfigDepth(rootConfig: PageConfig, fullPath: string[]): number {
+  let depth = 0
+  let configPath = fullPath
+  while (configPath.length) {
+    configPath = getParentConfig(rootConfig, configPath)[1]
+    depth++
+  }
+
+  return depth
 }
 
 const NetworkResourceConfiguratorSection = (
@@ -149,56 +225,22 @@ const Configurator = (
   const hasNetworkSettings = hasNonDefaultNetworkSettings({...config, id: ''})
   const [isVisible, setIsVisible] = useState(hasSettings)
   const [isNetVisible, setIsNetVisible] = useState(hasNetworkSettings)
+  const [parentConfig] = getParentConfig(props.rootConfig, props.configPath)
+  const configDepth = getConfigDepth(props.rootConfig, props.configPath)
+
+  // only allow first-level children to be draggable
+  const draggable = configDepth === 1
+
   return (
     <div
-      className="rounded bg-blue-900 p-2 mb-2 cursor-move"
-      draggable={props.configPath.length === 2} // only allow first-level children to be draggable
+      className={clsx('w-full rounded p-2 mb-2', {
+        'cursor-move': draggable,
+        'bg-blue-800': configDepth % 2 === 0,
+        'bg-blue-900': configDepth % 2 === 1,
+      })}
+      draggable={draggable}
       data-configpath={props.configPath.join(',')}
-      onDrag={e => {
-        if (props.config.type === ConfigType.Page || props.config.type === ConfigType.ScriptAction)
-          return
-
-        const allDraggables: HTMLElement[] = Array.from(document.querySelectorAll('div[draggable]'))
-        const positions = allDraggables.map(el => {
-          const rect = el.getBoundingClientRect()
-          return {el, position: (rect.top + rect.bottom) / 2, rect}
-        })
-        const closest = minBy(positions, ({position}) => Math.abs(position - e.clientY))
-        if (!closest) return
-
-        const isBeforeClosest = closest.position > e.clientY
-        const closestConfigPath = (closest.el.dataset.configpath || '').split(',')
-        if (!closestConfigPath.length) return
-        if (isEqual(props.configPath, closestConfigPath)) return
-
-        const closestConfig = get(props.rootConfig, closestConfigPath)
-        const parentArray: Required<PageConfig>['body'] = get(props.rootConfig, [
-          props.configPath[0],
-        ])
-        const targetParentArray: Required<PageConfig>['body'] = get(props.rootConfig, [
-          closestConfigPath[0],
-        ])
-
-        const updatedParentArray = parentArray.filter(item => item.id !== props.config.id)
-        const updatedTargetParentArray =
-          parentArray === targetParentArray ? updatedParentArray : targetParentArray.slice()
-        const indexOfTargetConfig = updatedTargetParentArray.findIndex(
-          item => item.id === closestConfig.id,
-        )
-        if (indexOfTargetConfig === -1) return
-
-        updatedTargetParentArray.splice(
-          isBeforeClosest ? indexOfTargetConfig : indexOfTargetConfig + 1,
-          0,
-          props.config,
-        )
-
-        if (isEqual(parentArray, updatedParentArray)) return
-        const rootConfig = {...props.rootConfig}
-        set(rootConfig, [props.configPath[0]], updatedParentArray)
-        set(rootConfig, [closestConfigPath[0]], updatedTargetParentArray)
-        props.setRootConfig(rootConfig)
-      }}>
+      onDrag={dragHandler(props)}>
       <div className="w-full flex items-center">
         <div className="flex-grow">{props.name}</div>
         <div className="w-auto h-6 flex items-center">
@@ -208,7 +250,7 @@ const Configurator = (
             toggle={[isVisible, setIsVisible]}
             flagged={hasSettings}
           />
-          {isNetworkResource(config) ? (
+          {isNetworkResource(config, parentConfig) ? (
             <ConfiguratorButton
               title="Toggle Network Settings"
               icon={NetworkIcon}
@@ -298,6 +340,121 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
           setValue={creationMethod => clickHandler({creationMethod}, props)()}
         />
       </ConfiguratorOption>
+      <ScriptActionListConfigurator
+        {...props}
+        label="Actions"
+        actionsList={config.actions}
+        configPath={[...props.configPath, 'actions']}
+      />
+    </Configurator>
+  )
+}
+
+const ScriptActionLabels: Record<ScriptActionType, string> = {
+  [ScriptActionType.Stall]: 'Stall',
+  [ScriptActionType.XHR]: 'XHR',
+  [ScriptActionType.SyncXHR]: 'Sync XHR',
+  [ScriptActionType.Fetch]: 'Fetch',
+  [ScriptActionType.SetTimeout]: 'Set Timeout',
+  [ScriptActionType.LoadListener]: 'onLoad',
+  [ScriptActionType.DCLListener]: 'onDCL',
+  [ScriptActionType.AddElement]: 'Add Element',
+}
+
+const ScriptActionListConfigurator = (
+  props: {label: string; actionsList: Array<ScriptActionConfig>} & Omit<ConfigProps, 'config'>,
+) => {
+  return (
+    <ConfiguratorOption label={props.label} lgTargetSize="full">
+      <div className="w-full">
+        {props.actionsList.map((action, idx) => (
+          <ScriptActionConfigurator
+            key={action.id}
+            rootConfig={props.rootConfig}
+            setRootConfig={props.setRootConfig}
+            config={action}
+            configPath={[...props.configPath, `${idx}`]}
+          />
+        ))}
+        <ButtonGroup className="py-2 text-xs">
+          {Object.keys(ScriptActionLabels).map(actionType_ => {
+            const actionType = actionType_ as ScriptActionType
+            return (
+              <Button
+                size="xs"
+                title={`Add a ${ScriptActionLabels[actionType]} action`}
+                onClick={clickHandler(
+                  [...props.actionsList, {type: ConfigType.ScriptAction, actionType}],
+                  props,
+                )}>
+                {ScriptActionLabels[actionType]}
+              </Button>
+            )
+          })}
+        </ButtonGroup>
+      </div>
+    </ConfiguratorOption>
+  )
+}
+
+const ScriptActionConfigurator = (props: ConfigProps<ScriptActionConfig>) => {
+  const config = withDefaults(props.config)
+  return (
+    <Configurator name={ScriptActionLabels[config.actionType]} {...props}>
+      {config.actionType === ScriptActionType.Stall ? (
+        <ConfiguratorOption label="Execution Duration" lgTargetSize="1/4">
+          <div className="text-xs">
+            <input
+              className="text-xs w-10 px-1 rounded text-black mr-2"
+              type="text"
+              value={config.executionDuration}
+              onChange={(e: any) =>
+                clickHandler({executionDuration: Number(e.target.value)}, props)()
+              }
+            />
+            ms
+          </div>
+        </ConfiguratorOption>
+      ) : (
+        <PreactFragment />
+      )}
+      {config.actionType === ScriptActionType.SetTimeout ? (
+        <ConfiguratorOption label="Timeout Delay" lgTargetSize="1/4">
+          <div className="text-xs">
+            <input
+              className="text-xs w-10 px-1 rounded text-black mr-2"
+              type="text"
+              value={config.timeoutDelay}
+              onChange={(e: any) => clickHandler({timeoutDelay: Number(e.target.value)}, props)()}
+            />
+            ms
+          </div>
+        </ConfiguratorOption>
+      ) : (
+        <PreactFragment />
+      )}
+      {config.actionType === ScriptActionType.AddElement ||
+      config.actionType === ScriptActionType.Fetch ||
+      config.actionType === ScriptActionType.XHR ||
+      config.actionType === ScriptActionType.SyncXHR ? (
+        <ConfiguratorOption
+          label={config.actionType === ScriptActionType.AddElement ? 'Element' : 'Request'}
+          lgTargetSize="full">
+          <ChildConfigurator
+            {...props}
+            config={config.dependent}
+            configPath={[...props.configPath, 'dependent']}
+          />
+        </ConfiguratorOption>
+      ) : (
+        <PreactFragment />
+      )}
+      <ScriptActionListConfigurator
+        {...props}
+        label="On Complete"
+        actionsList={config.onComplete}
+        configPath={[...props.configPath, 'onComplete']}
+      />
     </Configurator>
   )
 }

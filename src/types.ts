@@ -65,7 +65,7 @@ export interface ScriptActionConfig {
   id?: string
   executionDuration?: number
   timeoutDelay?: number
-  dependent?: NetworkResourceConfig
+  dependent?: Required<PageConfig>['body'][0]
   onComplete?: Array<ScriptActionConfig>
 }
 
@@ -195,8 +195,13 @@ const configDefaults: ConfigDefaultsMap = {
 
 export const EMPTY_PAGE: PageConfig = {type: ConfigType.Page, body: [{type: ConfigType.Text}]}
 
-export function isNetworkResource(config: CuzillionConfig): config is NetworkResourceConfig {
-  return config.type !== ConfigType.Text
+export function isNetworkResource(
+  config: CuzillionConfig,
+  parent?: CuzillionConfig,
+): config is NetworkResourceConfig {
+  if (config.type === ConfigType.ScriptAction) return false
+  if (config.type === ConfigType.Text && parent?.type === ConfigType.Page) return false
+  return true
 }
 
 export function withDefaults<T extends CuzillionConfig>(config: T): Required<T> {
