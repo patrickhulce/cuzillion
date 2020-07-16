@@ -6,22 +6,23 @@ import {deserializeConfig, serializeConfig} from './serialization'
 import debug from 'debug'
 import compression from 'compression'
 import {Factory} from './factory/factory'
+import {NowRequest, NowResponse} from '@vercel/node'
 
 const log = debug('cuzillion:server')
 
 const staticDir = path.join(__dirname, 'ui')
 const indexHtml = path.join(staticDir, 'index.html')
 
-function respondWithFactory(
+export function respondWithFactory(
   factory: (config: NetworkResourceConfig) => NetworkResourceResponse,
   injectBytes: (
     config: NetworkResourceConfig,
     body: Buffer | string | undefined,
   ) => Buffer | string | undefined,
 ) {
-  return async (req: express.Request, res: express.Response) => {
-    if (!req.query) return res.sendStatus(500)
-    if (typeof req.query.config !== 'string') return res.sendStatus(500)
+  return async (req: express.Request | NowRequest, res: express.Response | NowResponse) => {
+    if (!req.query) return res.status(500).send('No Query')
+    if (typeof req.query.config !== 'string') return res.status(500).send('No Config')
 
     try {
       const config = deserializeConfig(req.query.config)
@@ -30,10 +31,12 @@ function respondWithFactory(
       if (!isNetworkResource(config)) throw new Error('Config not for network resource')
       if (config.fetchDelay) await wait(config.fetchDelay)
       if (config.redirectCount) {
+        const originalUrl = 'originalUrl' in req ? req.originalUrl : req.url || '/'
         const newConfig = {...config, redirectCount: config.redirectCount - 1}
-        const newUrl = new URL(req.originalUrl, 'http://localhost')
+        const newUrl = new URL(originalUrl, 'http://localhost')
         newUrl.searchParams.set('config', serializeConfig(newConfig))
-        return res.redirect(302, `${newUrl.pathname}${newUrl.search}`)
+        res.setHeader('Location', `${newUrl.pathname}${newUrl.search}`)
+        return res.status(302).send('')
       }
 
       if (config.statusCode) res.status(config.statusCode)
@@ -41,14 +44,14 @@ function respondWithFactory(
       const response = factory(config)
       if (response.headers) {
         for (const [key, value] of Object.entries(response.headers)) {
-          res.set(key, value)
+          res.setHeader(key, value)
         }
       }
 
       res.send(injectBytes(config, response.body))
     } catch (err) {
       log(`Error processing config: ${err.stack}\n`)
-      res.sendStatus(500)
+      res.status(500).send('Internal Error')
     }
   }
 }
