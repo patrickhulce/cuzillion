@@ -5,12 +5,16 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/bin.js",
+    "start:vercel": "vercel dev",
+    "clean": "rm -rf dist/ ui/",
+    "now-build": "yarn clean && yarn build && cp -R dist/ui/ ui/",
     "build": "yarn build:typescript && yarn build:parcel",
     "build:watch": "yarn build:typescript -w & yarn build:parcel:watch",
     "build:parcel": "parcel build ./src/ui/index.html --public-url=/ui/ --out-dir=./dist/ui",
     "build:parcel:watch": "parcel watch ./src/ui/index.html --public-url=/ui/ --out-dir=./dist/ui",
     "build:typescript": "tsc",
-    "test": "yarn build"
+    "test": "yarn build && yarn test:unit",
+    "test:unit": "jest"
   },
   "repository": {
     "type": "git",
@@ -43,9 +47,11 @@
     "preact": "^10.4.4",
     "prettier": "^2.0.5",
     "tailwindcss": "^1.4.6",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.5",
+    "vercel": "^19.1.2"
   },
   "dependencies": {
+    "@vercel/node": "^1.7.2",
     "compression": "^1.7.4",
     "debug": "^4.1.1",
     "express": "^4.17.1",

@@ -1,4 +1,7 @@
 dist/
+ui/
 .cache/
 .parcel-cache/
 .tmp/
+
+.vercel
