@@ -2,7 +2,7 @@ import * as preact from 'preact'
 import clsx from 'clsx'
 
 interface ButtonProps {
-  children: string | JSX.Element
+  children: string | preact.JSX.Element
   solo?: boolean
   flagged?: boolean
   selected?: boolean
@@ -65,7 +65,7 @@ export const Button = (props: ButtonProps) => {
   )
 }
 
-export const ButtonGroup = (props: {children: JSX.Element[]; className?: string}) => {
+export const ButtonGroup = (props: {children: preact.JSX.Element[]; className?: string}) => {
   return <div className={clsx('inline-flex', props.className)}>{props.children}</div>
 }
 
@@ -75,7 +75,7 @@ export function RadioButtonGroup<T>(props: {
   setValue: (next: T) => void
   size?: ButtonProps['size']
   color?: ButtonProps['color']
-}): JSX.Element {
+}): preact.JSX.Element {
   return (
     <ButtonGroup>
       {props.options.map((option, idx) => {
@@ -100,7 +100,7 @@ export function SelectButton<T>(props: {
   setValue: (next: T) => void
   size?: ButtonProps['size']
   color?: ButtonProps['color']
-}): JSX.Element {
+}): preact.JSX.Element {
   const classes = getButtonClasses({size: props.size, color: props.color, solo: true})
   return (
     <div className="inline-block relative">

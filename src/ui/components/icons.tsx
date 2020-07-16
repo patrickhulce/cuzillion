@@ -5,7 +5,7 @@ interface SvgProps {
   className?: string
 }
 
-const SvgIcon = (props: SvgProps & {children: JSX.Element | JSX.Element[]}) => {
+const SvgIcon = (props: SvgProps & {children: preact.JSX.Element | preact.JSX.Element[]}) => {
   return (
     <svg
       className={clsx('fill-current', props.className, {

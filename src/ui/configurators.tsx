@@ -193,7 +193,7 @@ const ConfiguratorButton = (props: {
   className?: string
   onClick?: () => void
   title: string
-  icon: (props: {className?: string}) => JSX.Element
+  icon: (props: {className?: string}) => preact.JSX.Element
   toggle?: [boolean, (b: boolean) => void]
   flagged?: boolean
 }) => {
@@ -219,7 +219,10 @@ const ConfiguratorButton = (props: {
 }
 
 const Configurator = (
-  props: ConfigProps<CuzillionConfig> & {name: string; children: JSX.Element | JSX.Element[]},
+  props: ConfigProps<CuzillionConfig> & {
+    name: string
+    children: preact.JSX.Element | preact.JSX.Element[]
+  },
 ) => {
   const config = withDefaults(props.config)
   const hasSettings = hasNonDefaultTypeSettings({...config, id: ''})
@@ -280,7 +283,7 @@ const Configurator = (
 
 const ConfiguratorOption = (props: {
   label: string
-  children: JSX.Element | JSX.Element[]
+  children: preact.JSX.Element | preact.JSX.Element[]
   lgTargetSize?: 'full' | '1/2' | '1/4'
 }) => {
   const {lgTargetSize = '1/2'} = props
