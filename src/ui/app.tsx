@@ -1,11 +1,11 @@
 import * as preact from 'preact'
-import {useState, useEffect} from 'preact/hooks'
+import {useState, useEffect, useRef} from 'preact/hooks'
 import {ConfigType, PageConfig, EMPTY_PAGE, initializeIds} from '../types'
 import {serializeConfig, deserializeConfig} from '../serialization'
 import {PageConfigurator} from './configurators'
 import {GitHubIcon} from './components/icons'
 
-function getDefaultPageConfig(): PageConfig {
+function readPageConfigFromHash(): PageConfig {
   const hashParams = new URLSearchParams(location.hash.replace('#', '?'))
   if (hashParams.has('config')) {
     const config = deserializeConfig(hashParams.get('config') || '')
@@ -15,7 +15,18 @@ function getDefaultPageConfig(): PageConfig {
   return EMPTY_PAGE
 }
 
-const DEFAULT_STATE = getDefaultPageConfig()
+const DEFAULT_STATE = readPageConfigFromHash()
+
+const HistorylessIframe = (props: preact.JSX.HTMLAttributes<HTMLIFrameElement>) => {
+  const {src, ...attributes} = props
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  useEffect(() => {
+    if (!iframeRef.current) return
+    if (!iframeRef.current.contentWindow) return
+    iframeRef.current.contentWindow.location.replace(src || 'about:blank')
+  }, [src])
+  return <iframe {...attributes} ref={iframeRef} src="about:blank" />
+}
 
 export const App = () => {
   const [config, setConfig] = useState<PageConfig>(DEFAULT_STATE)
@@ -27,7 +38,16 @@ export const App = () => {
   ).href
 
   useEffect(() => {
-    window.location.hash = `#config=${serializeConfig(config)}`
+    const serialized = serializeConfig(config)
+    const newHash = `#config=${serialized}`
+    const hashListener = () => {
+      if (window.location.hash === newHash) return
+      setConfig(readPageConfigFromHash())
+    }
+
+    window.location.hash = newHash
+    window.addEventListener('hashchange', hashListener)
+    return () => window.removeEventListener('hashchange', hashListener)
   }, [config])
 
   return (
@@ -90,10 +110,10 @@ export const App = () => {
         </main>
       </div>
       <div className="w-full sm:w-1/2 h-screen bg-white">
-        <iframe
+        <HistorylessIframe
           title="Configured Cuzillion Page"
           className="w-full h-screen"
-          src={iframeUrl}></iframe>
+          src={iframeUrl}></HistorylessIframe>
       </div>
     </div>
   )
