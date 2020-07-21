@@ -3,6 +3,7 @@ import {useState, useEffect} from 'preact/hooks'
 import {ConfigType, PageConfig, EMPTY_PAGE, initializeIds} from '../types'
 import {serializeConfig, deserializeConfig} from '../serialization'
 import {PageConfigurator} from './configurators'
+import {GitHubIcon} from './components/icons'
 
 function getDefaultPageConfig(): PageConfig {
   const hashParams = new URLSearchParams(location.hash.replace('#', '?'))
@@ -44,7 +45,11 @@ export const App = () => {
                 'cuz there are still a zillion pages to check in 2020
               </span>
             </div>
-            <div className="w-2/12"></div>
+            <div className="w-2/12 flex flex-row justify-end pr-2">
+              <a href="https://github.com/patrickhulce/cuzillion">
+                <GitHubIcon />
+              </a>
+            </div>
           </div>
         </nav>
         <main className="flex flex-col items-center flex-grow p-4 shadow">
