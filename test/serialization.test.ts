@@ -33,6 +33,7 @@ describe('serialization', () => {
         type: ConfigType.Page,
         head: [],
         body: [],
+        creationMethod: 'html',
         id: '',
         originPreference: '/',
         fetchDelay: 0,

@@ -21,7 +21,7 @@ import {
   OriginPreference,
   defaultNetworkResource,
 } from '../types'
-import {ButtonGroup, Button, RadioButtonGroup, SelectButton} from './components/button'
+import {ButtonGroup, Button, SelectButton} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import set from 'lodash/set'
