@@ -59,9 +59,13 @@ export function respondWithFactory(
 export function createServer(options: {
   port?: number
   logFn?: (...args: any[]) => void
+  availableOrigins?: string[]
 }): Promise<{port: number; close: () => Promise<void>}> {
   const {port: targetPort = 9801, logFn = log} = options
+
   const factory = Factory.defaultInstance()
+  if (options.availableOrigins) factory.setOrigins(options.availableOrigins)
+
   const app = express()
   app.get('/', (req, res) => res.sendFile(indexHtml))
   app.use('/ui/', compression())

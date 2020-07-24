@@ -1,17 +1,23 @@
 import {createServer} from '../src/server'
 import {fetch as fetch_} from '../src/node-fetch'
-import {CuzillionConfig, ConfigType} from '../src/types'
+import {CuzillionConfig, ConfigType, OriginPreference} from '../src/types'
 import {serializeConfig} from '../src/serialization'
 
 describe('.createServer', () => {
   let server
+  let serverSecondary
+  const availableOrigins = []
 
   beforeAll(async () => {
-    server = await createServer({port: 0})
+    server = await createServer({port: 0, availableOrigins})
+    serverSecondary = await createServer({port: 0, availableOrigins})
+    availableOrigins[0] = `http://localhost:${server.port}`
+    availableOrigins[1] = `http://localhost:${serverSecondary.port}`
   })
 
   afterAll(async () => {
     await server.close()
+    await serverSecondary.close()
   })
 
   function fetch(urlPath: string, config?: CuzillionConfig): ReturnType<typeof fetch_> {
@@ -127,6 +133,37 @@ describe('.createServer', () => {
 
         expect(redirectResponse.status).toEqual(302)
         expect(Date.now() - start).toBeGreaterThan(250)
+      })
+    })
+
+    describe('originPreference', () => {
+      it('not set origin for no preference', async () => {
+        const response = await fetch('/api/page.html', {
+          type: ConfigType.Page,
+          head: [{type: ConfigType.Script, originPreference: OriginPreference.SameOrigin}],
+        })
+        const body = await response.text()
+        expect(body).not.toContain(availableOrigins[0])
+      })
+
+      it('set origin for primary preference', async () => {
+        const response = await fetch('/api/page.html', {
+          type: ConfigType.Page,
+          head: [{type: ConfigType.Script, originPreference: OriginPreference.Primary}],
+        })
+        const body = await response.text()
+        expect(body).toContain(availableOrigins[0])
+        expect(body).not.toContain(availableOrigins[1])
+      })
+
+      it('set origin for secondary preference', async () => {
+        const response = await fetch('/api/page.html', {
+          type: ConfigType.Page,
+          head: [{type: ConfigType.Script, originPreference: OriginPreference.Secondary}],
+        })
+        const body = await response.text()
+        expect(body).not.toContain(availableOrigins[0])
+        expect(body).toContain(availableOrigins[1])
       })
     })
   })

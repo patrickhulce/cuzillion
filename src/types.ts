@@ -1,7 +1,16 @@
 import isEqual from 'lodash/isEqual'
 
+export enum OriginPreference {
+  SameOrigin = '/',
+  Primary = 'p1',
+  Secondary = 'p2',
+  Tertiary = 'p3',
+  Quaternary = 'p4',
+}
+
 interface NetworkResource {
   id?: string
+  originPreference?: OriginPreference
   fetchDelay?: number
   redirectCount?: number
   statusCode?: number
@@ -109,6 +118,7 @@ export type NetworkResourceConfigType = NetworkResourceConfig['type']
 export type CuzillionConfig = NetworkResourceConfig | ScriptActionConfig
 
 export interface IFactory {
+  setOrigins(origins: string[]): void
   getLinkTo(config: NetworkResourceConfig): string
   create(config: NetworkResourceConfig): NetworkResourceResponse
   injectBytes(
@@ -128,6 +138,7 @@ interface ConfigDefaultsMap {
 
 const defaultNetworkResource: Required<NetworkResource> = {
   id: '',
+  originPreference: OriginPreference.SameOrigin,
   statusCode: 200,
   redirectCount: 0,
   fetchDelay: 0,

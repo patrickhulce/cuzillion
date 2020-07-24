@@ -34,6 +34,7 @@ describe('serialization', () => {
         head: [],
         body: [],
         id: '',
+        originPreference: '/',
         fetchDelay: 0,
         redirectCount: 0,
         sizeInBytes: 0,
