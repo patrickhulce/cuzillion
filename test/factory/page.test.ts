@@ -26,6 +26,7 @@ describe('Page', () => {
           ],
           body: [
             {type: ConfigType.Script, inclusionType: ScriptInclusionType.ExternalDefer},
+            {type: ConfigType.Page, body: [{type: ConfigType.Text, textContent: 'Frames dawg'}]},
             {type: ConfigType.Text, textContent: "I am the walrus, Goo goo g'joob"},
           ],
         },
@@ -37,8 +38,10 @@ describe('Page', () => {
       expect(head.match(/<link/g)).toHaveLength(2)
       expect(head.match(/<script/g)).toHaveLength(2)
       expect(body.match(/<script/g)).toHaveLength(1)
+      expect(body.match(/<iframe/g)).toHaveLength(1)
       expect(head).toContain('stall(50)')
       expect(body).toContain('I am the walrus')
+      expect(body).not.toContain('Frames dawg')
     })
 
     it('should create elements using document.write', () => {

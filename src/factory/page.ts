@@ -75,6 +75,9 @@ function createHtmlChildren(children: PageConfig['body'], factory: IFactory): st
       case ConfigType.Script:
         childHtml += createScriptTag(child, factory)
         break
+      case ConfigType.Page:
+        childHtml += `<iframe src="${factory.getLinkTo(child)}"></iframe>`
+        break
       case ConfigType.Stylesheet:
         childHtml += createStylesheetTag(child, factory)
         break

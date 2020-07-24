@@ -64,6 +64,7 @@ export enum ElementCreationMethod {
 
 export interface PageConfig extends NetworkResource {
   type: ConfigType.Page
+  creationMethod?: ElementCreationMethod
   head?: Array<ScriptConfig | StyleConfig>
   body?: Array<PageConfig | ScriptConfig | StyleConfig | ImageConfig | TextConfig>
 }
@@ -149,6 +150,7 @@ const configDefaults: ConfigDefaultsMap = {
   [ConfigType.Page](config: PageConfig) {
     return {
       ...defaultNetworkResource,
+      creationMethod: ElementCreationMethod.HTML,
       head: [],
       body: [],
       ...config,
