@@ -19,6 +19,7 @@ import {
   ScriptActionConfig,
   ScriptActionType,
   OriginPreference,
+  defaultNetworkResource,
 } from '../types'
 import {ButtonGroup, Button, RadioButtonGroup, SelectButton} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
@@ -55,12 +56,14 @@ function clickHandler<T = PageConfig>(
       } else {
         delete parent[childKey]
       }
+    } else if (Array.isArray(config)) {
+      set(cloned, props.configPath, config)
     } else {
-      set(
-        cloned,
-        props.configPath,
-        Array.isArray(config) ? config : {...get(cloned, props.configPath), ...config},
-      )
+      const withModifications = {...get(cloned, props.configPath), ...config}
+      for (const key of Object.keys(withModifications)) {
+        if (withModifications[key] === undefined) delete withModifications[key]
+      }
+      set(cloned, props.configPath, withModifications)
     }
 
     props.setRootConfig(cloned)
@@ -135,6 +138,11 @@ function getConfigDepth(rootConfig: PageConfig, fullPath: string[]): number {
   }
 
   return depth
+}
+
+function canConfigureType(type: ConfigType, parentType: ConfigType): boolean {
+  if (type === ConfigType.ScriptAction) return false
+  return true
 }
 
 const OriginPreferenceLabels: Record<OriginPreference, string> = {
@@ -291,6 +299,31 @@ const Configurator = (
       </div>
       {isVisible || isNetVisible ? (
         <div className="w-full flex flex-wrap">
+          {isVisible && canConfigureType(config.type, parentConfig.type) ? (
+            <ConfiguratorOption label="Resource Type">
+              <SelectButton
+                size="xs"
+                value={config.type}
+                options={Object.keys(ConfigType)
+                  .map(configLabel => {
+                    const configType = (ConfigType as any)[configLabel] as ConfigType
+                    return {label: configLabel, value: configType}
+                  })
+                  .filter(option => option.value !== ConfigType.ScriptAction)}
+                setValue={newType => {
+                  if (config.type === newType) return
+
+                  const keysOfType = Object.keys(config)
+                  const keysOfNetwork = Object.keys(defaultNetworkResource)
+                  const keysToKill = keysOfType.filter(k => !keysOfNetwork.includes(k))
+                  const overrides: any = {}
+                  keysToKill.forEach(k => (overrides[k] = undefined))
+                  overrides.type = newType
+                  clickHandler(overrides, props)()
+                }}
+              />
+            </ConfiguratorOption>
+          ) : null}
           {isVisible ? props.children : null}
           {isNetVisible && isNetworkResource(config) ? (
             <NetworkResourceConfiguratorSection {...props} config={config} />
@@ -359,7 +392,7 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
           value={config.creationMethod}
           options={[
             {label: 'HTML', value: ElementCreationMethod.HTML},
-            {label: 'document.write', value: ElementCreationMethod.DocumentWrite},
+            {label: 'doc.write', value: ElementCreationMethod.DocumentWrite},
           ]}
           setValue={creationMethod => clickHandler({creationMethod}, props)()}
         />

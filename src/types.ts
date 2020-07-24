@@ -136,7 +136,7 @@ interface ConfigDefaultsMap {
   [ConfigType.Text](page: TextConfig): Required<TextConfig>
 }
 
-const defaultNetworkResource: Required<NetworkResource> = {
+export const defaultNetworkResource: Required<NetworkResource> = {
   id: '',
   originPreference: OriginPreference.SameOrigin,
   statusCode: 200,
@@ -216,8 +216,15 @@ export function isNetworkResource(
 }
 
 export function withDefaults<T extends CuzillionConfig>(config: T): Required<T> {
+  const configWithUndefinedDropped = {...config}
+  for (const key_ of Object.keys(config)) {
+    const key = key_ as keyof T
+    if (config[key] === undefined) delete configWithUndefinedDropped[key]
+  }
   const configWithDefaults =
-    config.type in configDefaults ? configDefaults[config.type](config as any) : config
+    config.type in configDefaults
+      ? configDefaults[config.type](configWithUndefinedDropped as any)
+      : config
   return configWithDefaults as any
 }
 

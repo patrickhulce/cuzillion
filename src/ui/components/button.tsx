@@ -111,7 +111,11 @@ export function SelectButton<T>(props: {
           'block appearance-none w-full pr-4 focus:outline-none focus:shadow-outline',
         )}>
         {props.options.map((option, idx) => {
-          return <option value={idx}>{option.label}</option>
+          return (
+            <option value={idx} selected={option.value === props.value}>
+              {option.label}
+            </option>
+          )
         })}
       </select>
       <div
