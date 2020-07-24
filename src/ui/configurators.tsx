@@ -418,6 +418,7 @@ const ScriptActionLabels: Record<ScriptActionType, string> = {
   [ScriptActionType.LoadListener]: 'onLoad',
   [ScriptActionType.DCLListener]: 'onDCL',
   [ScriptActionType.AddElement]: 'Add Element',
+  [ScriptActionType.Redirect]: 'Redirect',
 }
 
 const ScriptActionListConfigurator = (
@@ -501,6 +502,7 @@ const ScriptActionConfigurator = (props: ConfigProps<ScriptActionConfig>) => {
       )}
       {config.actionType === ScriptActionType.AddElement ||
       config.actionType === ScriptActionType.Fetch ||
+      config.actionType === ScriptActionType.Redirect ||
       config.actionType === ScriptActionType.XHR ||
       config.actionType === ScriptActionType.SyncXHR ? (
         <ConfiguratorOption
@@ -515,12 +517,16 @@ const ScriptActionConfigurator = (props: ConfigProps<ScriptActionConfig>) => {
       ) : (
         <PreactFragment />
       )}
-      <ScriptActionListConfigurator
-        {...props}
-        label="On Complete"
-        actionsList={config.onComplete}
-        configPath={[...props.configPath, 'onComplete']}
-      />
+      {config.actionType !== ScriptActionType.Redirect ? (
+        <ScriptActionListConfigurator
+          {...props}
+          label="On Complete"
+          actionsList={config.onComplete}
+          configPath={[...props.configPath, 'onComplete']}
+        />
+      ) : (
+        <PreactFragment />
+      )}
     </Configurator>
   )
 }
@@ -767,7 +773,7 @@ export const PageConfigurator = (props: Omit<ConfigProps, 'rootConfig'>) => {
         className="p-2 bg-blue-800 rounded mb-2"
         onDragOver={e => e.preventDefault()} // allow other elements to be dropped onto this element
       >
-        <div className="font-mono mb-2">head</div>
+        <div className="font-mono mb-2">body</div>
         <PageSubtarget
           target="body"
           depth={0}
