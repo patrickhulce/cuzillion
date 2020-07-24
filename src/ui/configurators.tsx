@@ -272,6 +272,10 @@ const Configurator = (
       })}
       draggable={draggable}
       data-configpath={props.configPath.join(',')}
+      onDragStart={e => {
+        const target = document.elementFromPoint(e.clientX, e.clientY)
+        if (target instanceof HTMLInputElement) return e.preventDefault()
+      }}
       onDrag={dragHandler(props)}>
       <div className="w-full flex items-center">
         <div className="flex-grow">{props.name}</div>
@@ -552,6 +556,37 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
   )
 }
 
+const FrameConfigurator = (props: ConfigProps<PageConfig>) => {
+  const config = withDefaults(props.config)
+  const configDepth = getConfigDepth(props.rootConfig, props.configPath)
+  return (
+    <Configurator name="Frame" {...props}>
+      <ConfiguratorOption label="head" lgTargetSize="full">
+        <div className="flex flex-col w-full">
+          <PageSubtarget
+            target="head"
+            depth={configDepth}
+            items={config.head}
+            configPath={props.configPath}
+            rootConfig={props.rootConfig}
+            setRootConfig={props.setRootConfig}></PageSubtarget>
+        </div>
+      </ConfiguratorOption>
+      <ConfiguratorOption label="body" lgTargetSize="full">
+        <div className="flex flex-col w-full">
+          <PageSubtarget
+            target="body"
+            depth={configDepth}
+            items={config.body}
+            configPath={props.configPath}
+            rootConfig={props.rootConfig}
+            setRootConfig={props.setRootConfig}></PageSubtarget>
+        </div>
+      </ConfiguratorOption>
+    </Configurator>
+  )
+}
+
 const ImageConfigurator = (props: ConfigProps<ImageConfig>) => {
   const config = withDefaults(props.config)
   return (
@@ -623,60 +658,80 @@ const ChildConfigurator = (props: {config: PageChildConfig} & Omit<ConfigProps, 
       return <ImageConfigurator {...props} config={props.config} />
     case ConfigType.Text:
       return <TextConfigurator {...props} config={props.config} />
+    case ConfigType.Page:
+      return <FrameConfigurator {...props} config={props.config} />
     default:
       return <div>Unsupported</div>
   }
 }
 
 const PageSubtarget = (
-  props: {label: 'head' | 'body'; items: Array<PageChildConfig>} & Omit<
+  props: {target: 'head' | 'body'; depth: number; items: Array<PageChildConfig>} & Omit<
     ConfigProps,
-    'config' | 'configPath'
+    'config'
   >,
 ) => {
-  const clickHandler = (type: PageChildConfig['type']) => () =>
-    props.setRootConfig({
-      ...props.rootConfig,
-      [props.label]: props.items.concat({type}),
+  const addEntryHandler = (type: PageChildConfig['type']) =>
+    clickHandler([...props.items, {type}], {
+      rootConfig: props.rootConfig,
+      setRootConfig: props.setRootConfig,
+      configPath: [...props.configPath, props.target],
     })
 
+  const size = props.depth > 0 ? 'xs' : 'sm'
+
   return (
-    <div
-      className="p-2 bg-blue-800 rounded mb-2"
-      onDragOver={e => e.preventDefault()} // allow other elements to be dropped onto this element
-    >
-      <div className="font-mono mb-2">{props.label}</div>
+    <PreactFragment>
       {props.items.map((item, idx) => (
         <ChildConfigurator
           key={`${item.type}-${item.id}`}
           {...props}
           config={item}
-          configPath={[props.label, idx.toString()]}
+          configPath={[...props.configPath, props.target, idx.toString()]}
         />
       ))}
-      <ButtonGroup className="py-2 text-sm">
-        <Button title="Add a script element" onClick={clickHandler(ConfigType.Script)}>
+      <ButtonGroup className={clsx('py-2')}>
+        <Button
+          size={size}
+          title="Add a script element"
+          onClick={addEntryHandler(ConfigType.Script)}>
           Script
         </Button>
-        <Button title="Add a stylesheet element" onClick={clickHandler(ConfigType.Stylesheet)}>
+        <Button
+          size={size}
+          title="Add a stylesheet element"
+          onClick={addEntryHandler(ConfigType.Stylesheet)}>
           Stylesheet
         </Button>
-        {props.label === 'body' ? (
-          <Button title="Add an image element" onClick={clickHandler(ConfigType.Image)}>
+        {props.target === 'body' ? (
+          <Button
+            size={size}
+            title="Add an iframe element"
+            onClick={addEntryHandler(ConfigType.Page)}>
+            Frame
+          </Button>
+        ) : (
+          <PreactFragment />
+        )}
+        {props.target === 'body' ? (
+          <Button
+            size={size}
+            title="Add an image element"
+            onClick={addEntryHandler(ConfigType.Image)}>
             Image
           </Button>
         ) : (
           <PreactFragment />
         )}
-        {props.label === 'body' ? (
-          <Button title="Add a text element" onClick={clickHandler(ConfigType.Text)}>
+        {props.target === 'body' ? (
+          <Button size={size} title="Add a text element" onClick={addEntryHandler(ConfigType.Text)}>
             Text
           </Button>
         ) : (
           <PreactFragment />
         )}
       </ButtonGroup>
-    </div>
+    </PreactFragment>
   )
 }
 
@@ -694,18 +749,34 @@ export const PageConfigurator = (props: Omit<ConfigProps, 'rootConfig'>) => {
           </Button>
         </div>
       </div>
-      <PageSubtarget
-        label="head"
-        items={headItems}
-        rootConfig={props.config}
-        setRootConfig={props.setRootConfig}
-      />
-      <PageSubtarget
-        label="body"
-        items={bodyItems}
-        rootConfig={props.config}
-        setRootConfig={props.setRootConfig}
-      />
+      <div
+        className="p-2 bg-blue-800 rounded mb-2"
+        onDragOver={e => e.preventDefault()} // allow other elements to be dropped onto this element
+      >
+        <div className="font-mono mb-2">head</div>
+        <PageSubtarget
+          target="head"
+          depth={0}
+          items={headItems}
+          configPath={[]}
+          rootConfig={props.config}
+          setRootConfig={props.setRootConfig}
+        />
+      </div>
+      <div
+        className="p-2 bg-blue-800 rounded mb-2"
+        onDragOver={e => e.preventDefault()} // allow other elements to be dropped onto this element
+      >
+        <div className="font-mono mb-2">head</div>
+        <PageSubtarget
+          target="body"
+          depth={0}
+          items={bodyItems}
+          configPath={[]}
+          rootConfig={props.config}
+          setRootConfig={props.setRootConfig}
+        />
+      </div>
     </div>
   )
 }

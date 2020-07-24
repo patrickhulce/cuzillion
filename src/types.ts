@@ -65,7 +65,7 @@ export enum ElementCreationMethod {
 export interface PageConfig extends NetworkResource {
   type: ConfigType.Page
   head?: Array<ScriptConfig | StyleConfig>
-  body?: Array<ScriptConfig | StyleConfig | ImageConfig | TextConfig>
+  body?: Array<PageConfig | ScriptConfig | StyleConfig | ImageConfig | TextConfig>
 }
 
 export interface ScriptActionConfig {
