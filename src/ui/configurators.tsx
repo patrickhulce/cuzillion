@@ -18,6 +18,7 @@ import {
   ElementCreationMethod,
   ScriptActionConfig,
   ScriptActionType,
+  OriginPreference,
 } from '../types'
 import {ButtonGroup, Button, RadioButtonGroup, SelectButton} from './components/button'
 import cloneDeep from 'lodash/cloneDeep'
@@ -136,6 +137,14 @@ function getConfigDepth(rootConfig: PageConfig, fullPath: string[]): number {
   return depth
 }
 
+const OriginPreferenceLabels: Record<OriginPreference, string> = {
+  [OriginPreference.SameOrigin]: 'Same Origin',
+  [OriginPreference.Primary]: 'Primary',
+  [OriginPreference.Secondary]: 'Secondary',
+  [OriginPreference.Tertiary]: 'Tertiary',
+  [OriginPreference.Quaternary]: 'Quaternary',
+}
+
 const NetworkResourceConfiguratorSection = (
   props: ConfigProps<Required<NetworkResourceConfig>>,
 ) => {
@@ -184,6 +193,17 @@ const NetworkResourceConfiguratorSection = (
           />
           KiB
         </div>
+      </ConfiguratorOption>
+      <ConfiguratorOption label="Origin Preference" lgTargetSize="1/2">
+        <SelectButton
+          size="xs"
+          value={props.config.originPreference}
+          options={Object.keys(OriginPreferenceLabels).map(originPref_ => {
+            const originPref = originPref_ as OriginPreference
+            return {label: OriginPreferenceLabels[originPref], value: originPref}
+          })}
+          setValue={originPreference => clickHandler({originPreference}, props)()}
+        />
       </ConfiguratorOption>
     </PreactFragment>
   )
