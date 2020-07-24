@@ -38,6 +38,11 @@ describe('Script', () => {
                 dependent: {type: ConfigType.Text, fetchDelay: 2000},
                 onComplete: [{type: ConfigType.ScriptAction, executionDuration: 100}],
               },
+              {
+                type: ConfigType.ScriptAction,
+                actionType: ScriptActionType.Redirect,
+                dependent: {type: ConfigType.Text, fetchDelay: 2000},
+              },
             ],
           },
           {
@@ -100,19 +105,23 @@ describe('Script', () => {
           })
           console.log('script action 1.5.6 done')
 
+          console.log('script action 1.5.9 started')
+          window.location = '/api/text.txt?config=eyJ0IjoidHh0IiwiZmV0Y2hEZWxheSI6MjAwMCwiaWQiOiIxMCJ9'
+          console.log('script action 1.5.9 done')
+
           console.log('script action 1.5 onComplete done')
         })
         console.log('script action 1.5 done')
 
-        console.log('script action 1.9 started')
+        console.log('script action 1.11 started')
         ;(() => {
           const html =
-            '\\\\n    <img src=\\"/api/image.jpg?config=eyJ0IjoiaW1nIiwiaWQiOiIxMCJ9\\" style=\\"width: 100px; height: 100px\\" />\\\\n  '
+            '\\\\n    <img src=\\"/api/image.jpg?config=eyJ0IjoiaW1nIiwiaWQiOiIxMiJ9\\" style=\\"width: 100px; height: 100px\\" />\\\\n  '
           const div = document.createElement('div')
           div.innerHTML = html
           while (div.children.length > 0) document.body.appendChild(div.children[0])
         })()
-        console.log('script action 1.9 done')
+        console.log('script action 1.11 done')
         "
       `)
     })

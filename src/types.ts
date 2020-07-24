@@ -49,6 +49,7 @@ export enum ScriptActionType {
   LoadListener = 'load',
   DCLListener = 'dcl',
   AddElement = 'element',
+  Redirect = 'redirect',
 }
 
 export enum StylesheetInclusionType {

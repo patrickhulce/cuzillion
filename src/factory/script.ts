@@ -38,6 +38,10 @@ function createActionBody(
       const fetchLink = factory.getLinkTo(dependent)
       return `fetch('${fetchLink}').then(() => { ${onCompleteBody} });`
     }
+    case ScriptActionType.Redirect: {
+      const locationLink = factory.getLinkTo(dependent)
+      return `window.location = '${locationLink}';`
+    }
     case ScriptActionType.AddElement: {
       const page = factory.create({type: ConfigType.Page, body: [dependent]})
       const bodyHtmlMatch = page.body.toString().match(/<body>([\s\S]+)<\/body>\s*<\/html>$/)
