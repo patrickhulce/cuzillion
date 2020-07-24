@@ -300,7 +300,7 @@ const Configurator = (
       {isVisible || isNetVisible ? (
         <div className="w-full flex flex-wrap">
           {isVisible && canConfigureType(config.type, parentConfig.type) ? (
-            <ConfiguratorOption label="Resource Type">
+            <ConfiguratorOption label="Resource Type" lgTargetSize="1/4">
               <SelectButton
                 size="xs"
                 value={config.type}
@@ -358,10 +358,9 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
 
   return (
     <Configurator name="Script" {...props}>
-      <ConfiguratorOption label="Inclusion Method">
-        <RadioButtonGroup
+      <ConfiguratorOption label="Inclusion Method" lgTargetSize="1/4">
+        <SelectButton
           size="xs"
-          color="teal"
           value={config.inclusionType}
           options={[
             {label: 'External', value: ScriptInclusionType.External},
@@ -386,13 +385,12 @@ const ScriptConfigurator = (props: ConfigProps<ScriptConfig>) => {
         </div>
       </ConfiguratorOption>
       <ConfiguratorOption label="Element Creation" lgTargetSize="1/4">
-        <RadioButtonGroup
+        <SelectButton
           size="xs"
-          color="teal"
           value={config.creationMethod}
           options={[
             {label: 'HTML', value: ElementCreationMethod.HTML},
-            {label: 'doc.write', value: ElementCreationMethod.DocumentWrite},
+            {label: 'document.write', value: ElementCreationMethod.DocumentWrite},
           ]}
           setValue={creationMethod => clickHandler({creationMethod}, props)()}
         />
@@ -527,10 +525,9 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
   const config = withDefaults(props.config)
   return (
     <Configurator name="Style" {...props}>
-      <ConfiguratorOption label="Inclusion Method">
-        <RadioButtonGroup
+      <ConfiguratorOption label="Inclusion Method" lgTargetSize="1/4">
+        <SelectButton
           size="xs"
-          color="teal"
           value={config.inclusionType}
           options={[
             {label: 'External', value: StylesheetInclusionType.External},
@@ -541,9 +538,8 @@ const StyleConfigurator = (props: ConfigProps<StyleConfig>) => {
         />
       </ConfiguratorOption>
       <ConfiguratorOption label="Element Creation" lgTargetSize="1/4">
-        <RadioButtonGroup
+        <SelectButton
           size="xs"
-          color="teal"
           value={config.creationMethod}
           options={[
             {label: 'HTML', value: ElementCreationMethod.HTML},
@@ -576,9 +572,8 @@ const ImageConfigurator = (props: ConfigProps<ImageConfig>) => {
         />
       </ConfiguratorOption>
       <ConfiguratorOption label="Element Creation" lgTargetSize="1/4">
-        <RadioButtonGroup
+        <SelectButton
           size="xs"
-          color="teal"
           value={config.creationMethod}
           options={[
             {label: 'HTML', value: ElementCreationMethod.HTML},
@@ -604,9 +599,8 @@ const TextConfigurator = (props: ConfigProps<TextConfig>) => {
         />
       </ConfiguratorOption>
       <ConfiguratorOption label="Element Creation" lgTargetSize="1/4">
-        <RadioButtonGroup
+        <SelectButton
           size="xs"
-          color="teal"
           value={config.creationMethod}
           options={[
             {label: 'HTML', value: ElementCreationMethod.HTML},
