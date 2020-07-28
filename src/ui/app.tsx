@@ -66,14 +66,14 @@ export const App = () => {
               </span>
             </div>
             <div className="w-2/12 flex flex-row justify-end pr-2">
-              <a href="https://github.com/patrickhulce/cuzillion">
+              <a href="https://github.com/patrickhulce/cuzillion" title="View the source on GitHub">
                 <GitHubIcon />
               </a>
             </div>
           </div>
         </nav>
         <main className="flex flex-col items-center flex-grow p-4 shadow">
-          <div className="flex w-full mb-4 text-sm">
+          <div className="flex w-full mb-4 text-sm flex-shrink-0">
             <label className="flex flex-wrap w-1/2">
               <div className="mr-4 text-gray-400">Editor URL</div>
               <input
