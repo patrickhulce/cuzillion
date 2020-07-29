@@ -1,5 +1,7 @@
 # cuzillion
 
+> 'cuz there are a zillion pages to check
+
 Inspired by the OG, [Steve Souders' cuzillion](https://github.com/stevesouders/Cuzillion).
 
 ## Development
